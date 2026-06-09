@@ -36,6 +36,7 @@ function Cart() {
               </div>
             )}
 
+
             {!loading && !error && cartItems.length > 0 && (
               <div className="divide-y divide-slate-200">
                 {cartItems.map((item) => {
