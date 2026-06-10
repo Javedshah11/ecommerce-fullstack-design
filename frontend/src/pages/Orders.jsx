@@ -31,7 +31,7 @@ function Orders() {
                 <p className="font-semibold text-slate-900">{order.id}</p>
                 <p className="text-sm text-slate-500">{order.date}</p>
               </div>
-              
+
               <p className="text-sm text-slate-600">{order.items.length} items</p>
               <p className="text-sm font-semibold text-slate-900">${order.total.toFixed(2)}</p>
               <span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${order.status === 'Delivered' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
@@ -41,6 +41,7 @@ function Orders() {
           ))}
         </div>
       </section>
+      
     </main>
   )
 }
