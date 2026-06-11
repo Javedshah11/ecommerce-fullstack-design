@@ -54,6 +54,7 @@ function Checkout() {
             <Link className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white" to="/orders">
               View orders
             </Link>
+            
             <Link className="rounded-md border border-slate-200 px-5 py-2.5 text-sm font-semibold text-blue-600" to="/products-grid">
               Continue shopping
             </Link>
