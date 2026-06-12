@@ -88,6 +88,7 @@ function PromoSection({ title, image, products }) {
   )
 }
 
+
 function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [inquiryMessage, setInquiryMessage] = useState('')
