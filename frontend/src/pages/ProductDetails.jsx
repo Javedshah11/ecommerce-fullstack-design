@@ -125,6 +125,7 @@ function ProductDetails() {
               <p className="mt-2 text-sm text-slate-600">{product.stock} units available</p>
             </div>
 
+
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <select
                 className="rounded-md border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-slate-100"
