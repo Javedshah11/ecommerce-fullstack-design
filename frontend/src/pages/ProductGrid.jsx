@@ -84,7 +84,7 @@ function ProductGrid() {
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
               />
-              
+
               <select
                 className="rounded-md border border-slate-200 px-3 py-2 text-sm"
                 value={category}
@@ -112,6 +112,7 @@ function ProductGrid() {
                   type="button"
                   onClick={() => updateCatalogParams({ category: item, page: '1' })}
                 >
+                  
                   {item}
                 </button>
               ))}
