@@ -112,11 +112,12 @@ function ProductGrid() {
                   type="button"
                   onClick={() => updateCatalogParams({ category: item, page: '1' })}
                 >
-                  
+
                   {item}
                 </button>
               ))}
             </div>
+
 
             <div className="mb-4 flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-4 md:flex-row md:items-center md:justify-between">
               <p className="font-medium text-slate-900">
