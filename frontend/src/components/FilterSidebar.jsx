@@ -12,9 +12,21 @@ function FilterGroup({ title, children }) {
   )
 }
 
-function FilterSidebar() {
+function RatingDots({ count }) {
   return (
-    <aside className="hidden lg:block">
+    <span className="flex gap-0.5 text-orange-400" aria-label={`${count} stars`}>
+      {Array.from({ length: count }).map((_, index) => (
+        <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20" key={index}>
+          <path d="m10 1.5 2.6 5.27 5.82.85-4.21 4.1.99 5.8L10 14.78l-5.2 2.74.99-5.8-4.21-4.1 5.82-.85L10 1.5Z" />
+        </svg>
+      ))}
+    </span>
+  )
+}
+
+function FilterSidebar({ isMobile = false }) {
+  return (
+    <aside className={isMobile ? 'block' : 'hidden lg:block'}>
       <div className="rounded-md border border-slate-200 bg-white px-4">
         <FilterGroup title="Category">
           <div className="space-y-2 text-sm text-slate-600">
@@ -76,7 +88,7 @@ function FilterSidebar() {
             {[5, 4, 3].map((rating) => (
               <label className="flex items-center gap-2" key={rating}>
                 <input className="h-4 w-4 rounded border-slate-300 text-blue-600" type="checkbox" />
-                <span className="text-orange-400">{'★'.repeat(rating)}</span>
+                <RatingDots count={rating} />
               </label>
             ))}
           </div>
