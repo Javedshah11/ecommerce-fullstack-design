@@ -1,41 +1,38 @@
-// ProductCard receives product details through props and displays them in a card.
-function ProductCard({ image, title, price, description }) {
+import { Link } from 'react-router-dom'
+
+function ProductCard({ product }) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-900/12">
-      <div className="overflow-hidden bg-slate-100">
+    <article className="group rounded-md border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-lg">
+      <Link className="block bg-white p-4" to={`/product/${product.id}`}>
         <img
-          className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105"
-          src={image}
-          alt={title}
+          className="mx-auto aspect-square w-full max-w-44 object-contain transition group-hover:scale-105"
+          src={product.image}
+          alt={product.title}
         />
-      </div>
-
-      <div className="flex flex-1 flex-col justify-between p-5">
-        <div>
-          <p className="mb-2 text-xs font-black uppercase tracking-wide text-teal-600">
-            Best seller
-          </p>
-          <h3 className="text-lg font-black text-slate-950">{title}</h3>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
-            {description}
-          </p>
-        </div>
-
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <p className="text-xl font-black text-slate-950">
-            ${price.toFixed(2)}
-          </p>
-          <button
-            className="rounded-full border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-black text-teal-700 transition hover:bg-teal-500 hover:text-white"
-            type="button"
-          >
-            Add
+      </Link>
+      <div className="border-t border-slate-100 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-lg font-semibold text-slate-900">${product.price.toFixed(2)}</p>
+            <p className="text-sm text-slate-400 line-through">${product.oldPrice.toFixed(2)}</p>
+          </div>
+          <button className="rounded-md border border-slate-200 p-2 text-blue-600 hover:bg-blue-50" type="button" aria-label="Add to wishlist">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 8.25c0-2.35-1.9-4.25-4.25-4.25A5.1 5.1 0 0 0 12 7a5.1 5.1 0 0 0-4.75-3C4.9 4 3 5.9 3 8.25c0 6.5 9 11.75 9 11.75s9-5.25 9-11.75Z" />
+            </svg>
           </button>
+        </div>
+        <Link className="mt-2 line-clamp-2 block text-sm leading-6 text-slate-700 hover:text-blue-600" to={`/product/${product.id}`}>
+          {product.title}
+        </Link>
+        <div className="mt-2 flex items-center gap-2 text-sm">
+          <span className="font-medium text-orange-500">{product.rating}</span>
+          <span className="text-slate-300">|</span>
+          <span className="text-slate-500">{product.shipping}</span>
         </div>
       </div>
     </article>
   )
 }
 
-// Export ProductCard so product pages can import and use it.
 export default ProductCard

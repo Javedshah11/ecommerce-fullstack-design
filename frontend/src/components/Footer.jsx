@@ -1,61 +1,64 @@
-// Footer displays helpful links and social shortcuts at the bottom of the page.
+import { Link } from 'react-router-dom'
+
+const columns = [
+  { title: 'About', links: ['About us', 'Find store', 'Categories', 'Blogs'] },
+  { title: 'Partnership', links: ['About us', 'Find store', 'Categories', 'Blogs'] },
+  { title: 'Information', links: ['Help Center', 'Money Refund', 'Shipping', 'Contact us'] },
+  { title: 'For users', links: ['Login', 'Register', 'Settings', 'My Orders'] },
+]
+
 function Footer() {
-  const currentYear = new Date().getFullYear()
-
   return (
-    <footer className="border-t border-slate-200 bg-white px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-3 md:items-start">
+    <footer className="border-t border-slate-200 bg-white">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_repeat(4,1fr)_1fr]">
         <div>
-          <a className="text-2xl font-black tracking-tight text-slate-950" href="#home">
-            ShopEase
-          </a>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
-            Curated essentials, simple shopping, and modern style for everyday
-            living.
+          <Link className="flex items-center gap-2 text-2xl font-bold text-blue-600" to="/">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white">
+              B
+            </span>
+            Brand
+          </Link>
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            Best information about the company goes here but now lorem ipsum is.
           </p>
+          <div className="mt-4 flex gap-2">
+            {['f', 't', 'in', 'ig'].map((item) => (
+              <a className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white" href="#home" key={item}>
+                {item}
+              </a>
+            ))}
+          </div>
         </div>
 
-        <div
-          className="flex flex-wrap gap-x-5 gap-y-3 text-sm font-bold text-slate-600 md:justify-center"
-          aria-label="Footer links"
-        >
-          <a className="transition hover:text-teal-700" href="#products">Products</a>
-          <a className="transition hover:text-teal-700" href="#categories">Categories</a>
-          <a className="transition hover:text-teal-700" href="#newsletter">Newsletter</a>
-          <a className="transition hover:text-teal-700" href="#cart">Cart</a>
-        </div>
+        {columns.map((column) => (
+          <div key={column.title}>
+            <h3 className="font-semibold text-slate-900">{column.title}</h3>
+            <div className="mt-3 space-y-2">
+              {column.links.map((link) => (
+                <a className="block text-sm text-slate-500 hover:text-blue-600" href="#home" key={link}>
+                  {link}
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
 
-        <div className="flex gap-3 md:justify-end" aria-label="Social links">
-          <a
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-sm font-black uppercase text-white transition hover:bg-teal-600"
-            href="#home"
-            aria-label="Facebook"
-          >
-            f
-          </a>
-          <a
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-xs font-black uppercase text-white transition hover:bg-teal-600"
-            href="#home"
-            aria-label="Instagram"
-          >
-            ig
-          </a>
-          <a
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-sm font-black uppercase text-white transition hover:bg-teal-600"
-            href="#home"
-            aria-label="Twitter"
-          >
-            x
-          </a>
+        <div>
+          <h3 className="font-semibold text-slate-900">Get app</h3>
+          <div className="mt-3 space-y-2">
+            <div className="rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white">App Store</div>
+            <div className="rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Google Play</div>
+          </div>
         </div>
       </div>
-
-      <p className="mx-auto mt-8 max-w-7xl border-t border-slate-200 pt-6 text-sm text-slate-500">
-        &copy; {currentYear} ShopEase. All rights reserved.
-      </p>
+      <div className="border-t border-slate-200 bg-slate-50 px-4 py-4">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-2 text-sm text-slate-500 sm:flex-row">
+          <p>© 2026 Ecommerce.</p>
+          <p>English</p>
+        </div>
+      </div>
     </footer>
   )
 }
 
-// Export Footer so it can be reused in the app layout.
 export default Footer

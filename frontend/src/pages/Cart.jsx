@@ -1,57 +1,85 @@
-// Cart displays sample cart items without using a backend.
-function Cart() {
-  const cartItems = [
-    { id: 1, title: 'Wireless Headphones', price: 59.99, quantity: 1 },
-    { id: 2, title: 'Classic Backpack', price: 44.99, quantity: 2 },
-  ]
+import DiscountBanner from '../components/DiscountBanner'
+import ProductCard from '../components/ProductCard'
+import products, { savedItems } from '../data/products'
 
-  const totalPrice = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
-  )
+function Cart() {
+  const cartItems = products.slice(0, 3)
+  const subtotal = cartItems.reduce((total, item) => total + item.price, 0)
+  const discount = 60
+  const tax = 14
+  const total = subtotal - discount + tax
 
   return (
-    <main id="cart" className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
-      <section className="mx-auto mb-10 max-w-4xl">
-        <p className="mb-3 text-sm font-black uppercase tracking-wide text-teal-700">
-          Your order
-        </p>
-        <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
-          Shopping Cart
-        </h1>
-      </section>
+    <main className="bg-slate-100 px-4 py-5">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="mb-5 text-2xl font-semibold text-slate-900">My cart ({cartItems.length})</h1>
 
-      <section className="mx-auto grid max-w-4xl gap-4" aria-label="Cart items">
-        {cartItems.map((item) => (
-          <article
-            className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 sm:flex-row sm:items-center"
-            key={item.id}
-          >
-            <div>
-              <h2 className="text-lg font-black text-slate-950">
-                {item.title}
-              </h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Quantity: {item.quantity}
-              </p>
+        <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
+          <section className="rounded-md border border-slate-200 bg-white p-4">
+            <div className="divide-y divide-slate-200">
+              {cartItems.map((item) => (
+                <article className="grid gap-4 py-4 first:pt-0 sm:grid-cols-[90px_1fr_auto]" key={item.id}>
+                  <img className="h-20 w-20 rounded-md border border-slate-200 object-cover" src={item.image} alt={item.title} />
+                  <div>
+                    <h2 className="font-semibold text-slate-900">{item.title}</h2>
+                    <p className="mt-1 text-sm text-slate-500">Size: medium, Color: blue, Material: plastic</p>
+                    <p className="text-sm text-slate-500">Seller: {item.supplier}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-semibold text-red-600" type="button">Remove</button>
+                      <button className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-semibold text-blue-600" type="button">Save for later</button>
+                    </div>
+                  </div>
+                  <div className="sm:text-right">
+                    <p className="font-semibold text-slate-900">${item.price.toFixed(2)}</p>
+                    <select className="mt-3 rounded-md border border-slate-200 px-3 py-2 text-sm">
+                      <option>Qty: 1</option>
+                      <option>Qty: 2</option>
+                    </select>
+                  </div>
+                </article>
+              ))}
             </div>
-            <p className="text-xl font-black text-slate-950">
-              ${(item.price * item.quantity).toFixed(2)}
-            </p>
-          </article>
-        ))}
-      </section>
 
-      <section
-        className="mx-auto mt-5 flex max-w-4xl flex-col justify-between gap-3 rounded-2xl bg-slate-950 p-5 text-white sm:flex-row sm:items-center"
-        aria-label="Cart total"
-      >
-        <span className="font-bold text-slate-300">Total Price</span>
-        <strong className="text-2xl font-black">${totalPrice.toFixed(2)}</strong>
-      </section>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-between">
+              <button className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white" type="button">Back to shop</button>
+              <button className="rounded-md border border-slate-200 px-5 py-2.5 text-sm font-semibold text-blue-600" type="button">Remove all</button>
+            </div>
+          </section>
+
+          <aside className="space-y-4">
+            <div className="rounded-md border border-slate-200 bg-white p-4">
+              <p className="text-sm text-slate-600">Have a coupon?</p>
+              <div className="mt-2 flex">
+                <input className="min-w-0 flex-1 rounded-l-md border border-slate-200 px-3 py-2 text-sm" placeholder="Add coupon" />
+                <button className="rounded-r-md border border-l-0 border-slate-200 px-3 text-sm font-semibold text-blue-600" type="button">Apply</button>
+              </div>
+            </div>
+
+            <div className="rounded-md border border-slate-200 bg-white p-4">
+              <div className="space-y-2 border-b border-slate-200 pb-3 text-sm">
+                <p className="flex justify-between text-slate-600"><span>Subtotal:</span><span>${subtotal.toFixed(2)}</span></p>
+                <p className="flex justify-between text-red-500"><span>Discount:</span><span>-${discount.toFixed(2)}</span></p>
+                <p className="flex justify-between text-green-600"><span>Tax:</span><span>+${tax.toFixed(2)}</span></p>
+              </div>
+              <p className="mt-3 flex justify-between text-lg font-semibold text-slate-900"><span>Total:</span><span>${total.toFixed(2)}</span></p>
+              <button className="mt-4 w-full rounded-md bg-green-600 py-3 font-semibold text-white hover:bg-green-700" type="button">Checkout</button>
+            </div>
+          </aside>
+        </div>
+
+        <section className="mt-5 rounded-md border border-slate-200 bg-white p-4">
+          <h2 className="mb-4 text-xl font-semibold text-slate-900">Saved for later</h2>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {savedItems.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <DiscountBanner />
     </main>
   )
 }
 
-// Export Cart so it can be used later with routing.
 export default Cart

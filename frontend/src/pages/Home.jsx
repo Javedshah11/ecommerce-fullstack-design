@@ -1,188 +1,208 @@
-// Import the reusable ProductCard component for the featured products grid.
+import { Link } from 'react-router-dom'
+import CategorySidebar from '../components/CategorySidebar'
 import ProductCard from '../components/ProductCard'
-
-// Import dummy frontend data while the project has no backend.
+import Newsletter from '../components/Newsletter'
+import categories, { regions } from '../data/categories'
 import products from '../data/products'
 
-const categories = [
-  {
-    id: 1,
-    name: 'Tech Essentials',
-    itemCount: '24 products',
-    image:
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 2,
-    name: 'Daily Carry',
-    itemCount: '18 products',
-    image:
-      'https://images.unsplash.com/photo-1622560480654-d96214fdc887?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 3,
-    name: 'Home Workspace',
-    itemCount: '31 products',
-    image:
-      'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80',
-  },
+const deals = [
+  { label: 'Smart watches', discount: '-25%', image: products[2].image },
+  { label: 'Laptops', discount: '-15%', image: products[8].image },
+  { label: 'GoPro cameras', discount: '-40%', image: products[1].image },
+  { label: 'Headphones', discount: '-25%', image: products[3].image },
+  { label: 'Canon cameras', discount: '-25%', image: products[0].image },
 ]
 
-// Home displays the complete professional ecommerce landing page.
-function Home() {
-  const featuredProducts = products.slice(0, 4)
+const serviceCards = [
+  'Source from industry hubs',
+  'Customize your products',
+  'Fast, reliable shipping',
+  'Product inspection',
+]
 
+function PromoSection({ title, image, items }) {
   return (
-    <main id="home" className="overflow-x-hidden">
-      <section className="relative bg-gradient-to-br from-white via-teal-50 to-slate-100 px-4 py-16 sm:px-6 sm:py-20 md:py-24 lg:px-8 xl:py-28">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2 xl:gap-16">
-          <div className="max-w-3xl">
-            <p className="mb-4 text-sm font-black uppercase tracking-wide text-teal-700">
-              New season essentials
-            </p>
-            <h1 className="text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl md:text-6xl xl:text-7xl">
-              Shop smarter with curated everyday products.
+    <section className="mx-auto grid max-w-7xl overflow-hidden rounded-md border border-slate-200 bg-white lg:grid-cols-[280px_1fr]">
+      <div className="relative min-h-52 bg-slate-900 p-6 text-white">
+        <img className="absolute inset-0 h-full w-full object-cover opacity-45" src={image} alt="" />
+        <div className="relative">
+          <h2 className="max-w-44 text-xl font-semibold">{title}</h2>
+          <Link className="mt-5 inline-flex rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-900" to="/products-grid">
+            Source now
+          </Link>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+        {items.map((product) => (
+          <Link className="border-b border-r border-slate-200 p-4 hover:bg-slate-50" key={product.id} to={`/product/${product.id}`}>
+            <h3 className="text-sm font-medium text-slate-900">{product.title.split(' ').slice(0, 3).join(' ')}</h3>
+            <p className="mt-1 text-xs text-slate-500">From USD {product.price}</p>
+            <img className="ml-auto mt-2 h-20 w-20 object-contain" src={product.image} alt={product.title} />
+          </Link>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function Home() {
+  return (
+    <main className="bg-slate-100">
+      <div className="mx-auto max-w-7xl px-4 py-4 lg:hidden">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {categories.slice(0, 7).map((category) => (
+            <Link className="shrink-0 rounded-md bg-slate-200 px-3 py-2 text-sm text-blue-700" key={category} to="/products">
+              {category}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-5 lg:grid-cols-[250px_1fr_220px]">
+        <CategorySidebar />
+
+        <div className="relative overflow-hidden rounded-md bg-gradient-to-r from-cyan-100 to-blue-100 p-8">
+          <div className="relative z-10 max-w-md">
+            <p className="text-lg text-slate-800">Latest trending</p>
+            <h1 className="mt-1 text-3xl font-bold text-slate-950 md:text-4xl">
+              Electronic items
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-              Discover quality tech, lifestyle, and home essentials in one clean
-              shopping experience built for comfort and confidence.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                className="inline-flex items-center justify-center rounded-full bg-teal-500 px-7 py-4 text-base font-black text-white shadow-xl shadow-teal-500/25 transition hover:-translate-y-0.5 hover:bg-teal-600"
-                href="#products"
-              >
-                Shop Now
-              </a>
-              <a
-                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-7 py-4 text-base font-black text-slate-900 transition hover:border-teal-300 hover:text-teal-700"
-                href="#categories"
-              >
-                Browse Categories
-              </a>
+            <Link className="mt-5 inline-flex rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm" to="/products-grid">
+              Learn more
+            </Link>
+          </div>
+          <img
+            className="absolute bottom-0 right-0 hidden h-full w-1/2 object-cover md:block"
+            src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1000&q=80"
+            alt="Electronics marketplace"
+          />
+        </div>
+
+        <aside className="hidden space-y-3 lg:block">
+          <div className="rounded-md bg-blue-50 p-4">
+            <div className="flex gap-2">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 text-blue-600">U</span>
+              <p className="text-sm text-slate-900">Hi, user let's get started</p>
+            </div>
+            <button className="mt-3 w-full rounded-md bg-blue-600 py-2 text-sm font-semibold text-white" type="button">Join now</button>
+            <button className="mt-2 w-full rounded-md bg-white py-2 text-sm font-semibold text-blue-600" type="button">Log in</button>
+          </div>
+          <div className="rounded-md bg-orange-400 p-4 text-sm font-medium text-white">
+            Get US $10 off with a new supplier
+          </div>
+          <div className="rounded-md bg-teal-500 p-4 text-sm font-medium text-white">
+            Send quotes with supplier preferences
+          </div>
+        </aside>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-5">
+        <div className="grid overflow-hidden rounded-md border border-slate-200 bg-white lg:grid-cols-[280px_1fr]">
+          <div className="border-b border-slate-200 p-5 lg:border-b-0 lg:border-r">
+            <h2 className="text-xl font-semibold text-slate-900">Deals and offers</h2>
+            <p className="mt-1 text-sm text-slate-500">Hygiene equipments</p>
+            <div className="mt-5 flex gap-2">
+              {['04', '13', '34', '56'].map((item, index) => (
+                <div className="rounded-md bg-slate-700 px-3 py-2 text-center text-white" key={item}>
+                  <p className="font-semibold">{item}</p>
+                  <p className="text-xs">{['Days', 'Hour', 'Min', 'Sec'][index]}</p>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="relative" aria-label="Featured ecommerce collection">
-            <img
-              className="aspect-[4/5] w-full rounded-3xl object-cover shadow-2xl shadow-slate-900/20 sm:aspect-[16/11] lg:aspect-[4/5]"
-              src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1100&q=80"
-              alt="Person shopping for modern lifestyle products"
-            />
-            <div className="absolute bottom-4 left-4 rounded-2xl border border-white/70 bg-white/90 p-4 shadow-xl shadow-slate-900/15 backdrop-blur sm:bottom-6 sm:left-6">
-              <strong className="block text-2xl font-black leading-none text-slate-950">
-                8k+
-              </strong>
-              <span className="text-sm font-bold text-slate-600">
-                happy shoppers
-              </span>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            {deals.map((deal) => (
+              <Link className="border-r border-slate-200 p-4 text-center hover:bg-slate-50" key={deal.label} to="/products-grid">
+                <img className="mx-auto h-24 w-24 object-contain" src={deal.image} alt={deal.label} />
+                <p className="mt-2 text-sm text-slate-900">{deal.label}</p>
+                <span className="mt-2 inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600">
+                  {deal.discount}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      <section id="products" className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
-        <div className="mx-auto mb-10 max-w-7xl">
-          <p className="mb-3 text-sm font-black uppercase tracking-wide text-teal-700">
-            Featured products
-          </p>
-          <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-            Popular picks this week
-          </h2>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-            Handpicked products with simple cards, clean props, and reusable
-            React components.
-          </p>
-        </div>
+      <div className="space-y-5 px-4 pb-5">
+        <PromoSection
+          title="Home and outdoor"
+          image="https://images.unsplash.com/photo-1513161455079-7dc1de15ef3e?auto=format&fit=crop&w=900&q=80"
+          items={products.slice(5, 9)}
+        />
+        <PromoSection
+          title="Consumer electronics and gadgets"
+          image="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80"
+          items={products.slice(0, 4)}
+        />
+      </div>
 
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {featuredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              image={product.image}
-              title={product.title}
-              price={product.price}
-              description={product.description}
-            />
+      <section className="mx-auto max-w-7xl px-4 pb-5">
+        <div className="grid gap-6 rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white md:grid-cols-2">
+          <div>
+            <h2 className="text-2xl font-semibold">An easy way to send requests to all suppliers</h2>
+            <p className="mt-3 max-w-md text-sm text-blue-100">
+              Send your request and suppliers will respond with current prices and shipping options.
+            </p>
+          </div>
+          <form className="rounded-md bg-white p-5 text-slate-900 shadow-lg">
+            <h3 className="font-semibold">Send quote to suppliers</h3>
+            <input className="mt-4 w-full rounded-md border border-slate-200 px-3 py-2 text-sm" placeholder="What item you need?" />
+            <textarea className="mt-3 min-h-20 w-full rounded-md border border-slate-200 px-3 py-2 text-sm" placeholder="Type more details" />
+            <div className="mt-3 flex gap-2">
+              <input className="w-24 rounded-md border border-slate-200 px-3 py-2 text-sm" placeholder="Quantity" />
+              <select className="rounded-md border border-slate-200 px-3 py-2 text-sm">
+                <option>Pcs</option>
+              </select>
+            </div>
+            <button className="mt-4 rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white" type="button">
+              Send inquiry
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-5">
+        <h2 className="mb-5 text-xl font-semibold text-slate-900">Recommended items</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
 
-      <section
-        id="categories"
-        className="bg-white px-4 py-16 sm:px-6 md:py-20 lg:px-8"
-      >
-        <div className="mx-auto mb-10 max-w-7xl">
-          <p className="mb-3 text-sm font-black uppercase tracking-wide text-teal-700">
-            Shop by category
-          </p>
-          <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-            Find what fits your day
-          </h2>
-        </div>
-
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-3">
-          {categories.map((category) => (
-            <article
-              className="group relative min-h-72 overflow-hidden rounded-3xl shadow-lg shadow-slate-900/10"
-              key={category.id}
-            >
-              <img
-                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                src={category.image}
-                alt={category.name}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-6">
-                <h3 className="text-2xl font-black text-white">
-                  {category.name}
-                </h3>
-                <p className="mt-1 text-sm font-bold text-teal-100">
-                  {category.itemCount}
-                </p>
+      <section className="mx-auto max-w-7xl px-4 pb-5">
+        <h2 className="mb-5 text-xl font-semibold text-slate-900">Our extra services</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {serviceCards.map((service, index) => (
+            <article className="overflow-hidden rounded-md border border-slate-200 bg-white" key={service}>
+              <img className="h-28 w-full object-cover" src={products[index].image} alt={service} />
+              <div className="p-4">
+                <h3 className="font-semibold text-slate-900">{service}</h3>
               </div>
             </article>
           ))}
         </div>
       </section>
 
-      <section
-        id="newsletter"
-        className="px-4 py-16 sm:px-6 md:py-20 lg:px-8"
-      >
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 rounded-3xl bg-slate-950 p-6 shadow-2xl shadow-slate-900/20 sm:p-8 md:grid-cols-2 lg:p-12">
-          <div>
-            <p className="mb-3 text-sm font-black uppercase tracking-wide text-teal-300">
-              Stay updated
-            </p>
-            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-              Get fresh arrivals and exclusive offers.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-slate-300">
-              Join the ShopEase list for product drops, seasonal picks, and
-              shopping inspiration.
-            </p>
-          </div>
-
-          <form className="flex flex-col gap-3 rounded-2xl bg-white p-3 sm:flex-row">
-            <input
-              className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-200 px-4 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-4 focus:ring-teal-100"
-              type="email"
-              placeholder="Enter your email"
-              aria-label="Email"
-            />
-            <button
-              className="rounded-xl bg-teal-500 px-6 py-3 font-black text-white transition hover:bg-teal-600"
-              type="submit"
-            >
-              Subscribe
-            </button>
-          </form>
+      <section className="mx-auto max-w-7xl px-4 pb-8">
+        <h2 className="mb-5 text-xl font-semibold text-slate-900">Suppliers by region</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {regions.map((region) => (
+            <div className="flex items-center gap-3" key={region.country}>
+              <span className="h-7 w-10 rounded-sm bg-slate-200" />
+              <div>
+                <p className="text-sm text-slate-900">{region.country}</p>
+                <p className="text-xs text-slate-500">{region.domain}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
+
+      <Newsletter />
     </main>
   )
 }
 
-// Export Home so App.jsx can render it.
 export default Home
