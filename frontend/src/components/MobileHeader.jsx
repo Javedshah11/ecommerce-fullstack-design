@@ -14,6 +14,15 @@ function IconButton({ children, label, onClick }) {
 }
 
 function MobileHeader({ onMenuClick }) {
+  function handleSearch(event) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const query = formData.get('query')?.toString().trim()
+    window.location.href = query
+      ? `/products-grid?search=${encodeURIComponent(query)}`
+      : '/products-grid'
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
       <div className="flex items-center justify-between gap-3">
@@ -45,13 +54,14 @@ function MobileHeader({ onMenuClick }) {
         </div>
       </div>
 
-      <div className="mt-3 flex rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+      <form className="mt-3 flex rounded-lg border border-slate-200 bg-slate-50 px-3 py-2" onSubmit={handleSearch}>
         <input
           className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+          name="query"
           placeholder="Search products"
           type="search"
         />
-      </div>
+      </form>
     </header>
   )
 }

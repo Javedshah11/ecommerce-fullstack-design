@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import categories from '../data/categories'
 
 const brands = ['Samsung', 'Apple', 'Huawei', 'Pocco', 'Lenovo']
@@ -25,6 +26,8 @@ function RatingDots({ count }) {
 }
 
 function FilterSidebar({ isMobile = false }) {
+  const [message, setMessage] = useState('')
+
   return (
     <aside className={isMobile ? 'block' : 'hidden lg:block'}>
       <div className="rounded-md border border-slate-200 bg-white px-4">
@@ -66,7 +69,11 @@ function FilterSidebar({ isMobile = false }) {
             <input className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm" placeholder="Min" />
             <input className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm" placeholder="Max" />
           </div>
-          <button className="mt-3 w-full rounded-md border border-blue-200 bg-white py-2 text-sm font-semibold text-blue-600" type="button">
+          <button
+            className="mt-3 w-full rounded-md border border-blue-200 bg-white py-2 text-sm font-semibold text-blue-600"
+            type="button"
+            onClick={() => setMessage('Price filter applied.')}
+          >
             Apply
           </button>
         </FilterGroup>
@@ -92,6 +99,7 @@ function FilterSidebar({ isMobile = false }) {
               </label>
             ))}
           </div>
+          {message && <p className="mt-3 text-xs font-medium text-blue-700">{message}</p>}
         </div>
       </div>
     </aside>

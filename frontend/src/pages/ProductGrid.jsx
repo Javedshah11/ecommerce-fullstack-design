@@ -8,7 +8,18 @@ import products from '../data/products'
 
 function ProductGrid() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const chips = ['Samsung', 'Apple', 'Pocco', 'Metallic', '4 star']
+  const [verifiedOnly, setVerifiedOnly] = useState(false)
+  const [sortBy, setSortBy] = useState('Featured')
+  const [chips, setChips] = useState(['Samsung', 'Apple', 'Pocco', 'Metallic', '4 star'])
+
+  const visibleProducts = products
+    .filter((product) => (verifiedOnly ? product.verified : true))
+    .toSorted((first, second) => {
+      if (sortBy === 'Lowest price') return first.price - second.price
+      if (sortBy === 'Newest') return second.id - first.id
+      return second.rating - first.rating
+    })
+    .slice(0, 9)
 
   return (
     <main className="bg-slate-100 px-4 py-5">
@@ -28,11 +39,16 @@ function ProductGrid() {
           <section>
             <div className="mb-3 flex flex-wrap gap-2">
               {chips.map((chip) => (
-                <span className="rounded-md border border-blue-200 bg-white px-3 py-1.5 text-sm text-slate-700" key={chip}>
+                <button
+                  className="rounded-md border border-blue-200 bg-white px-3 py-1.5 text-sm text-slate-700"
+                  key={chip}
+                  type="button"
+                  onClick={() => setChips((current) => current.filter((item) => item !== chip))}
+                >
                   {chip} x
-                </span>
+                </button>
               ))}
-              <button className="text-sm font-semibold text-blue-600" type="button">Clear all filter</button>
+              <button className="text-sm font-semibold text-blue-600" type="button" onClick={() => setChips([])}>Clear all filter</button>
             </div>
 
             <div className="mb-4 flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-4 md:flex-row md:items-center md:justify-between">
@@ -49,10 +65,21 @@ function ProductGrid() {
                   Filter
                 </button>
                 <label className="flex items-center gap-2 text-sm text-slate-600">
-                  <input type="checkbox" /> Verified only
+                  <input
+                    checked={verifiedOnly}
+                    type="checkbox"
+                    onChange={(event) => setVerifiedOnly(event.target.checked)}
+                  />{' '}
+                  Verified only
                 </label>
-                <select className="rounded-md border border-slate-200 px-3 py-2 text-sm">
+                <select
+                  className="rounded-md border border-slate-200 px-3 py-2 text-sm"
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                >
                   <option>Featured</option>
+                  <option>Newest</option>
+                  <option>Lowest price</option>
                 </select>
                 <Link className="rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-600" to="/products">
                   List
@@ -61,7 +88,7 @@ function ProductGrid() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {products.slice(0, 9).map((product) => (
+              {visibleProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

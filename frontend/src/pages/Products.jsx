@@ -8,6 +8,17 @@ import products from '../data/products'
 
 function Products() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [verifiedOnly, setVerifiedOnly] = useState(false)
+  const [sortBy, setSortBy] = useState('Featured')
+
+  const visibleProducts = products
+    .filter((product) => (verifiedOnly ? product.verified : true))
+    .toSorted((first, second) => {
+      if (sortBy === 'Lowest price') return first.price - second.price
+      if (sortBy === 'Newest') return second.id - first.id
+      return second.rating - first.rating
+    })
+    .slice(0, 6)
 
   return (
     <main className="bg-slate-100 px-4 py-5">
@@ -41,9 +52,18 @@ function Products() {
                   Filter
                 </button>
                 <label className="flex items-center gap-2 text-sm text-slate-600">
-                  <input type="checkbox" /> Verified only
+                  <input
+                    checked={verifiedOnly}
+                    type="checkbox"
+                    onChange={(event) => setVerifiedOnly(event.target.checked)}
+                  />{' '}
+                  Verified only
                 </label>
-                <select className="rounded-md border border-slate-200 px-3 py-2 text-sm">
+                <select
+                  className="rounded-md border border-slate-200 px-3 py-2 text-sm"
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                >
                   <option>Featured</option>
                   <option>Newest</option>
                   <option>Lowest price</option>
@@ -55,7 +75,7 @@ function Products() {
             </div>
 
             <div className="space-y-3">
-              {products.slice(0, 6).map((product) => (
+              {visibleProducts.map((product) => (
                 <ProductListItem key={product.id} product={product} />
               ))}
             </div>

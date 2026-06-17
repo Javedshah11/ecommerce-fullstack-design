@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import DiscountBanner from '../components/DiscountBanner'
 import ProductCard from '../components/ProductCard'
@@ -8,6 +9,22 @@ function ProductDetails() {
   const { id } = useParams()
   const product = products.find((item) => item.id === Number(id)) || products[0]
   const gallery = products.slice(0, 6)
+  const [selectedImage, setSelectedImage] = useState({
+    productId: product.id,
+    image: product.image,
+  })
+  const [activeTab, setActiveTab] = useState('Description')
+  const [cartMessage, setCartMessage] = useState('')
+
+  const tabContent = {
+    Description: product.description,
+    Reviews: `${product.reviews} buyers reviewed this product. Average rating is ${product.rating}.`,
+    Shipping: `${product.shipping}. Supplier supports worldwide shipping from ${product.location}.`,
+    'About seller': `${product.supplier} is based in ${product.location}.`,
+  }
+
+  const mainImage =
+    selectedImage.productId === product.id ? selectedImage.image : product.image
 
   return (
     <main className="bg-slate-100 px-4 py-5">
@@ -19,11 +36,18 @@ function ProductDetails() {
         <section className="grid gap-5 rounded-md border border-slate-200 bg-white p-4 lg:grid-cols-[380px_1fr_280px]">
           <div>
             <div className="rounded-md border border-slate-200 p-4">
-              <img className="mx-auto aspect-square w-full object-contain" src={product.image} alt={product.title} />
+              <img className="mx-auto aspect-square w-full object-contain" src={mainImage} alt={product.title} />
             </div>
             <div className="mt-3 grid grid-cols-6 gap-2">
               {gallery.map((item) => (
-                <img className="aspect-square rounded-md border border-slate-200 object-cover p-1" key={item.id} src={item.image} alt={item.title} />
+                <button
+                  className={`rounded-md border object-cover p-1 ${mainImage === item.image ? 'border-blue-500' : 'border-slate-200'}`}
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedImage({ productId: product.id, image: item.image })}
+                >
+                  <img className="aspect-square object-cover" src={item.image} alt={item.title} />
+                </button>
               ))}
             </div>
           </div>
@@ -54,6 +78,18 @@ function ProductDetails() {
                 </div>
               ))}
             </div>
+            <button
+              className="mt-5 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              type="button"
+              onClick={() => setCartMessage(`${product.title} added to cart preview.`)}
+            >
+              Add to cart
+            </button>
+            {cartMessage && (
+              <p className="mt-3 rounded-md bg-green-50 p-3 text-sm text-green-700">
+                {cartMessage}
+              </p>
+            )}
           </div>
 
           <SupplierCard product={product} />
@@ -62,14 +98,19 @@ function ProductDetails() {
         <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_280px]">
           <div className="rounded-md border border-slate-200 bg-white">
             <div className="flex gap-6 border-b border-slate-200 px-5 text-sm font-medium">
-              {['Description', 'Reviews', 'Shipping', 'About seller'].map((tab, index) => (
-                <button className={`py-4 ${index === 0 ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`} key={tab} type="button">
+              {Object.keys(tabContent).map((tab) => (
+                <button
+                  className={`py-4 ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                >
                   {tab}
                 </button>
               ))}
             </div>
             <div className="p-5 text-sm leading-7 text-slate-600">
-              <p>{product.description}</p>
+              <p>{tabContent[activeTab]}</p>
               <p className="mt-3">
                 This static product detail view mirrors a marketplace product page with price tiers,
                 supplier information, specifications, tabs, and related product suggestions.
