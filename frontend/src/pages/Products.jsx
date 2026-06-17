@@ -7,13 +7,20 @@ import products from '../data/products'
 // Products displays a responsive grid of product cards.
 function Products() {
   return (
-    <main id="products" className="page products-page">
-      <section className="section-heading">
-        <p className="section-heading__eyebrow">Featured collection</p>
-        <h1>Products</h1>
+    <main id="products" className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+      <section className="mx-auto mb-10 max-w-7xl">
+        <p className="mb-3 text-sm font-black uppercase tracking-wide text-teal-700">
+          Featured collection
+        </p>
+        <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+          Products
+        </h1>
       </section>
 
-      <section className="products-grid" aria-label="Product list">
+      <section
+        className="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        aria-label="Product list"
+      >
         {products.map((product) => (
           <ProductCard
             key={product.id}

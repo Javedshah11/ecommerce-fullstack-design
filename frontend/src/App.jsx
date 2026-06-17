@@ -5,18 +5,15 @@ import Footer from './components/Footer'
 // Import the first page shown in this beginner Week 1 project.
 import Home from './pages/Home'
 
-// Import component styles for the eCommerce frontend.
-import './App.css'
-
 // App is the main component that connects the page layout together.
 function App() {
   // JSX lets us write HTML-like markup inside JavaScript.
   return (
-    <>
+    <div className="min-h-screen overflow-x-hidden bg-slate-50 font-sans text-slate-900 antialiased">
       <Navbar />
       <Home />
       <Footer />
-    </>
+    </div>
   )
 }
 
