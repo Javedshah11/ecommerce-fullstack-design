@@ -1,105 +1,40 @@
-import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import categories from '../data/categories'
 
-const brands = ['Samsung', 'Apple', 'Huawei', 'Pocco', 'Lenovo']
-const features = ['Metallic', 'Plastic cover', '8GB Ram', 'Super power', 'Large Memory']
-
-function FilterGroup({ title, children }) {
-  return (
-    <div className="border-b border-slate-200 py-4">
-      <h3 className="mb-3 font-semibold text-slate-900">{title}</h3>
-      {children}
-    </div>
-  )
-}
-
-function RatingDots({ count }) {
-  return (
-    <span className="flex gap-0.5 text-orange-400" aria-label={`${count} stars`}>
-      {Array.from({ length: count }).map((_, index) => (
-        <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20" key={index}>
-          <path d="m10 1.5 2.6 5.27 5.82.85-4.21 4.1.99 5.8L10 14.78l-5.2 2.74.99-5.8-4.21-4.1 5.82-.85L10 1.5Z" />
-        </svg>
-      ))}
-    </span>
-  )
-}
-
 function FilterSidebar({ isMobile = false }) {
-  const [message, setMessage] = useState('')
-
   return (
     <aside className={isMobile ? 'block' : 'hidden lg:block'}>
-      <div className="rounded-md border border-slate-200 bg-white px-4">
-        <FilterGroup title="Category">
-          <div className="space-y-2 text-sm text-slate-600">
-            {categories.slice(0, 6).map((category) => (
-              <label className="flex items-center gap-2" key={category}>
-                <input className="h-4 w-4 rounded border-slate-300 text-blue-600" type="checkbox" />
+      <div className="rounded-md border border-slate-200 bg-white p-4">
+        <h2 className="font-semibold text-slate-900">Catalog filters</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Browse products by category, then refine results with search and sorting controls.
+        </p>
+
+        <div className="mt-5 border-t border-slate-200 pt-4">
+          <h3 className="mb-3 text-sm font-semibold text-slate-900">Categories</h3>
+          <div className="space-y-1">
+            <Link className="block rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50" to="/products-grid">
+              All products
+            </Link>
+            {categories.map((category) => (
+              <Link
+                className="block rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600"
+                key={category}
+                to={`/products-grid?category=${encodeURIComponent(category)}`}
+              >
                 {category}
-              </label>
+              </Link>
             ))}
           </div>
-        </FilterGroup>
+        </div>
 
-        <FilterGroup title="Brands">
-          <div className="space-y-2 text-sm text-slate-600">
-            {brands.map((brand) => (
-              <label className="flex items-center gap-2" key={brand}>
-                <input className="h-4 w-4 rounded border-slate-300 text-blue-600" type="checkbox" />
-                {brand}
-              </label>
-            ))}
-          </div>
-        </FilterGroup>
-
-        <FilterGroup title="Features">
-          <div className="space-y-2 text-sm text-slate-600">
-            {features.map((feature) => (
-              <label className="flex items-center gap-2" key={feature}>
-                <input className="h-4 w-4 rounded border-slate-300 text-blue-600" type="checkbox" />
-                {feature}
-              </label>
-            ))}
-          </div>
-        </FilterGroup>
-
-        <FilterGroup title="Price range">
-          <div className="grid grid-cols-2 gap-2">
-            <input className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm" placeholder="Min" />
-            <input className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm" placeholder="Max" />
-          </div>
-          <button
-            className="mt-3 w-full rounded-md border border-blue-200 bg-white py-2 text-sm font-semibold text-blue-600"
-            type="button"
-            onClick={() => setMessage('Price filter applied.')}
-          >
-            Apply
-          </button>
-        </FilterGroup>
-
-        <FilterGroup title="Condition">
-          <div className="space-y-2 text-sm text-slate-600">
-            {['Any', 'Refurbished', 'Brand new', 'Old items'].map((item) => (
-              <label className="flex items-center gap-2" key={item}>
-                <input name="condition" type="radio" />
-                {item}
-              </label>
-            ))}
-          </div>
-        </FilterGroup>
-
-        <div className="py-4">
-          <h3 className="mb-3 font-semibold text-slate-900">Ratings</h3>
-          <div className="space-y-2 text-sm text-slate-600">
-            {[5, 4, 3].map((rating) => (
-              <label className="flex items-center gap-2" key={rating}>
-                <input className="h-4 w-4 rounded border-slate-300 text-blue-600" type="checkbox" />
-                <RatingDots count={rating} />
-              </label>
-            ))}
-          </div>
-          {message && <p className="mt-3 text-xs font-medium text-blue-700">{message}</p>}
+        <div className="mt-5 rounded-md bg-slate-50 p-4">
+          <h3 className="text-sm font-semibold text-slate-900">Buyer tools</h3>
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+            <li>Use search for product names and descriptions.</li>
+            <li>Sort products by price, newest, or featured status.</li>
+            <li>Open a product to review stock, price, and details.</li>
+          </ul>
         </div>
       </div>
     </aside>

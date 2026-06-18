@@ -1,47 +1,65 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { getProducts } from '../api/products'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import ApiError from '../components/ApiError'
 import FilterSidebar from '../components/FilterSidebar'
 import MobileFilterDrawer from '../components/MobileFilterDrawer'
 import Pagination from '../components/Pagination'
 import ProductCard from '../components/ProductCard'
+import ProductSkeleton from '../components/ProductSkeleton'
 import categories from '../data/categories'
+import useProducts from '../hooks/useProducts'
 
 function ProductGrid() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [verifiedOnly, setVerifiedOnly] = useState(false)
-  const [sortBy, setSortBy] = useState('Featured')
-  const [chips, setChips] = useState(['Samsung', 'Apple', 'Pocco', 'Metallic', '4 star'])
-  const [products, setProducts] = useState([])
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
+  const search = searchParams.get('search') || ''
+  const category = searchParams.get('category') || ''
+  const featured = searchParams.get('featured') || undefined
+  const sort = searchParams.get('sort') || 'newest'
+  const page = Number(searchParams.get('page')) || 1
+  const limit = 8
+  const { products, pagination, loading, error, retry } = useProducts({
+    search,
+    category,
+    featured,
+    sort,
+    page,
+    limit,
+  })
 
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        setLoading(true)
-        setError('')
-        const data = await getProducts({ search, category })
-        setProducts(data)
-      } catch {
-        setError('Products could not be loaded. Make sure the backend server is running.')
-      } finally {
-        setLoading(false)
+  const updateCatalogParams = useCallback((nextValues) => {
+    const nextParams = new URLSearchParams(searchParams)
+
+    Object.entries(nextValues).forEach(([key, value]) => {
+      if (value) {
+        nextParams.set(key, value)
+      } else {
+        nextParams.delete(key)
       }
+    })
+
+    if (nextValues.search !== undefined || nextValues.category !== undefined) {
+      nextParams.delete('featured')
     }
 
-    loadProducts()
-  }, [search, category])
+    setSearchParams(nextParams)
+  }, [searchParams, setSearchParams])
 
-  const visibleProducts = products
-    .filter((product) => (verifiedOnly ? product.verified : true))
-    .toSorted((first, second) => {
-      if (sortBy === 'Lowest price') return first.price - second.price
-      if (sortBy === 'Newest') return new Date(second.createdAt || 0) - new Date(first.createdAt || 0)
-      return second.rating - first.rating
-    })
+  useEffect(() => {
+    const timeout = setTimeout(() => setSearchInput(search), 0)
+    return () => clearTimeout(timeout)
+  }, [search])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (searchInput !== search) {
+        updateCatalogParams({ search: searchInput, page: '1' })
+      }
+    }, 450)
+
+    return () => clearTimeout(timeout)
+  }, [searchInput, search, updateCatalogParams])
 
   return (
     <main className="bg-slate-100 px-4 py-5">
@@ -52,38 +70,24 @@ function ProductGrid() {
 
       <div className="mx-auto max-w-7xl">
         <div className="mb-4 text-sm text-slate-500">
-          Home &gt; Clothing &gt; Men's wear &gt; Summer clothing
+          Home &gt; Catalog
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[250px_1fr]">
           <FilterSidebar />
 
           <section>
-            <div className="mb-3 flex flex-wrap gap-2">
-              {chips.map((chip) => (
-                <button
-                  className="rounded-md border border-blue-200 bg-white px-3 py-1.5 text-sm text-slate-700"
-                  key={chip}
-                  type="button"
-                  onClick={() => setChips((current) => current.filter((item) => item !== chip))}
-                >
-                  {chip} x
-                </button>
-              ))}
-              <button className="text-sm font-semibold text-blue-600" type="button" onClick={() => setChips([])}>Clear all filter</button>
-            </div>
-
             <div className="mb-4 grid gap-3 rounded-md border border-slate-200 bg-white p-4 md:grid-cols-[1fr_220px]">
               <input
                 className="rounded-md border border-slate-200 px-3 py-2 text-sm"
                 placeholder="Search products"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
               />
               <select
                 className="rounded-md border border-slate-200 px-3 py-2 text-sm"
                 value={category}
-                onChange={(event) => setCategory(event.target.value)}
+                onChange={(event) => updateCatalogParams({ category: event.target.value, page: '1' })}
               >
                 <option value="">All categories</option>
                 {categories.map((item) => (
@@ -92,8 +96,30 @@ function ProductGrid() {
               </select>
             </div>
 
+            <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+              <button
+                className={`shrink-0 rounded-md px-3 py-2 text-sm font-medium ${!category ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
+                type="button"
+                onClick={() => updateCatalogParams({ category: '', page: '1' })}
+              >
+                All
+              </button>
+              {categories.map((item) => (
+                <button
+                  className={`shrink-0 rounded-md px-3 py-2 text-sm font-medium ${category === item ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
+                  key={item}
+                  type="button"
+                  onClick={() => updateCatalogParams({ category: item, page: '1' })}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
             <div className="mb-4 flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-4 md:flex-row md:items-center md:justify-between">
-              <p className="font-medium text-slate-900">{visibleProducts.length} items available</p>
+              <p className="font-medium text-slate-900">
+                Showing {pagination.showing} of {pagination.totalProducts} products
+              </p>
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 lg:hidden"
@@ -105,22 +131,14 @@ function ProductGrid() {
                   </svg>
                   Filter
                 </button>
-                <label className="flex items-center gap-2 text-sm text-slate-600">
-                  <input
-                    checked={verifiedOnly}
-                    type="checkbox"
-                    onChange={(event) => setVerifiedOnly(event.target.checked)}
-                  />{' '}
-                  Verified only
-                </label>
                 <select
                   className="rounded-md border border-slate-200 px-3 py-2 text-sm"
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
+                  value={sort}
+                  onChange={(event) => updateCatalogParams({ sort: event.target.value, page: '1' })}
                 >
-                  <option>Featured</option>
-                  <option>Newest</option>
-                  <option>Lowest price</option>
+                  <option value="newest">Newest</option>
+                  <option value="price-low">Price: low to high</option>
+                  <option value="price-high">Price: high to low</option>
                 </select>
                 <Link className="rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-600" to="/products">
                   List
@@ -128,17 +146,36 @@ function ProductGrid() {
               </div>
             </div>
 
-            {loading && <p className="rounded-md bg-white p-5 text-sm text-slate-600">Loading products...</p>}
-            {error && <p className="rounded-md bg-red-50 p-5 text-sm text-red-700">{error}</p>}
-            {!loading && !error && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {visibleProducts.map((product) => (
-                  <ProductCard key={product._id} product={product} />
+            {loading && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {Array.from({ length: limit }).map((_, index) => (
+                  <ProductSkeleton key={index} />
                 ))}
               </div>
             )}
+            {error && <ApiError message={error} onRetry={retry} />}
+            {!loading && !error && (
+              products.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {products.map((product) => (
+                    <ProductCard key={product._id} product={product} />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-md border border-slate-200 bg-white p-8 text-center">
+                  <h2 className="text-lg font-semibold text-slate-900">No products found</h2>
+                  <p className="mt-2 text-sm text-slate-500">Try a different search term or category.</p>
+                </div>
+              )
+            )}
 
-            <Pagination />
+            {!loading && !error && pagination.totalPages > 1 && (
+              <Pagination
+                page={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={(nextPage) => updateCatalogParams({ page: String(nextPage) })}
+              />
+            )}
           </section>
         </div>
       </div>

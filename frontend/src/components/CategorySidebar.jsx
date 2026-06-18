@@ -8,7 +8,7 @@ function CategorySidebar() {
         <Link
           className={`block rounded-md px-3 py-2 text-sm ${index === 0 ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
           key={category}
-          to="/products"
+          to={`/products-grid?category=${encodeURIComponent(category)}`}
         >
           {category}
         </Link>

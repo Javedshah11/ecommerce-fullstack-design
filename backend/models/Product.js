@@ -17,6 +17,10 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Product image is required'],
       trim: true,
     },
+    images: {
+      type: [String],
+      default: [],
+    },
     description: {
       type: String,
       required: [true, 'Product description is required'],
@@ -39,46 +43,9 @@ const productSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
-    oldPrice: {
-      type: Number,
-      default: 0,
-    },
-    rating: {
-      type: Number,
-      default: 4.5,
-    },
-    reviews: {
-      type: Number,
-      default: 0,
-    },
-    sold: {
-      type: Number,
-      default: 0,
-    },
-    shipping: {
-      type: String,
-      default: 'Free Shipping',
-    },
-    supplier: {
-      type: String,
-      default: 'Brand Supply Co.',
-    },
-    location: {
-      type: String,
-      default: 'United States',
-    },
-    verified: {
-      type: Boolean,
-      default: true,
-    },
-    specs: {
-      type: Map,
-      of: String,
-      default: {},
-    },
   },
   {
-    timestamps: true,
+    versionKey: false,
   },
 )
 

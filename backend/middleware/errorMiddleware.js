@@ -5,9 +5,21 @@ export function notFound(req, res, next) {
 }
 
 export function errorHandler(error, req, res, next) {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode
+  let statusCode = res.statusCode === 200 ? 500 : res.statusCode
+  let message = error.message
+
+  if (error.name === 'ValidationError') {
+    statusCode = 400
+    message = Object.values(error.errors).map((item) => item.message).join(', ')
+  }
+
+  if (error.name === 'CastError') {
+    statusCode = 400
+    message = 'Invalid resource id'
+  }
+
   res.status(statusCode).json({
-    message: error.message,
+    message,
     ...(process.env.NODE_ENV === 'production' ? {} : { stack: error.stack }),
   })
 }

@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import { getProductId, getProductName, getProductOldPrice } from '../utils/product'
+import useCart from '../hooks/useCart'
+import { getProductId, getProductName } from '../utils/product'
 
 function ProductListItem({ product }) {
-  const [isSaved, setIsSaved] = useState(false)
+  const { addToCart } = useCart()
   const productId = getProductId(product)
   const productName = getProductName(product)
-  const oldPrice = getProductOldPrice(product)
 
   return (
     <article className="grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-[180px_1fr]">
@@ -19,25 +18,24 @@ function ProductListItem({ product }) {
             {productName}
           </Link>
           <button
-            className={`rounded-md border p-2 text-blue-600 hover:bg-blue-50 ${isSaved ? 'border-blue-200 bg-blue-50' : 'border-slate-200'}`}
+            className="rounded-md border border-slate-200 p-2 text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:text-slate-300"
             type="button"
-            aria-label={isSaved ? 'Remove from wishlist' : 'Wishlist'}
-            onClick={() => setIsSaved((current) => !current)}
+            aria-label="Add to cart"
+            disabled={product.stock === 0}
+            onClick={() => addToCart(product)}
           >
-            <svg className="h-5 w-5" fill={isSaved ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 8.25c0-2.35-1.9-4.25-4.25-4.25A5.1 5.1 0 0 0 12 7a5.1 5.1 0 0 0-4.75-3C4.9 4 3 5.9 3 8.25c0 6.5 9 11.75 9 11.75s9-5.25 9-11.75Z" />
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l2.4 12.2A2 2 0 0 0 9.36 17h7.78a2 2 0 0 0 1.95-1.57L21 7H6" />
             </svg>
           </button>
         </div>
         <div>
           <span className="text-xl font-semibold text-slate-900">${product.price.toFixed(2)}</span>
-          <span className="ml-2 text-sm text-slate-400 line-through">${oldPrice.toFixed(2)}</span>
+          <span className="ml-2 text-sm text-slate-500">{product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span className="font-medium text-orange-500">{product.rating}</span>
-          <span className="text-slate-500">{product.reviews} reviews</span>
-          <span className="text-slate-500">{product.sold} sold</span>
-          <span className="font-medium text-green-600">{product.shipping}</span>
+          <span className="font-medium text-blue-600">{product.category}</span>
+          {product.featured && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">Featured</span>}
         </div>
         <p className="max-w-3xl text-sm leading-6 text-slate-600">{product.description}</p>
         <Link className="text-sm font-semibold text-blue-600" to={`/product/${productId}`}>

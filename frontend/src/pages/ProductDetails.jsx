@@ -1,189 +1,165 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getProductById, getProducts } from '../api/products'
+import ApiError from '../components/ApiError'
 import DiscountBanner from '../components/DiscountBanner'
 import ProductCard from '../components/ProductCard'
+import ProductSkeleton from '../components/ProductSkeleton'
 import SupplierCard from '../components/SupplierCard'
-import { addToCart } from '../utils/cart'
-import { getProductId, getProductName, getProductSpecs } from '../utils/product'
+import useCart from '../hooks/useCart'
+import useProduct from '../hooks/useProduct'
+import useProducts from '../hooks/useProducts'
+import { getProductId, getProductName } from '../utils/product'
+
+function StockBadge({ stockStatus }) {
+  const styles = {
+    inStock: 'bg-green-50 text-green-700',
+    lowStock: 'bg-amber-50 text-amber-700',
+    outOfStock: 'bg-red-50 text-red-700',
+  }
+  const labels = {
+    inStock: 'In stock',
+    lowStock: 'Low stock',
+    outOfStock: 'Out of stock',
+  }
+
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${styles[stockStatus] || styles.outOfStock}`}>
+      {labels[stockStatus] || 'Out of stock'}
+    </span>
+  )
+}
 
 function ProductDetails() {
   const { id } = useParams()
-  const [product, setProduct] = useState(null)
-  const [products, setProducts] = useState([])
-  const [selectedImage, setSelectedImage] = useState(null)
-  const [activeTab, setActiveTab] = useState('Description')
-  const [cartMessage, setCartMessage] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { product, loading, error, retry } = useProduct(id)
+  const { addToCart } = useCart()
+  const [quantity, setQuantity] = useState(1)
+  const [selectedImage, setSelectedImage] = useState('')
+  const { products: relatedProducts } = useProducts({
+    category: product?.category || '',
+    limit: 5,
+    sort: 'newest',
+  })
+  const productId = getProductId(product)
+  const productName = getProductName(product)
+  const related = relatedProducts.filter((item) => getProductId(item) !== productId).slice(0, 4)
+  const maxQuantity = product?.stock || 0
+  const quantityOptions = Array.from({ length: Math.min(maxQuantity, 10) }).map((_, index) => index + 1)
+  const galleryImages = useMemo(() => {
+    if (!product) return []
+
+    const images = Array.isArray(product.images) && product.images.length > 0
+      ? product.images
+      : [product.image]
+
+    return [...new Set(images.filter(Boolean))]
+  }, [product])
 
   useEffect(() => {
-    async function loadProduct() {
-      try {
-        setLoading(true)
-        setError('')
-        const [selectedProduct, allProducts] = await Promise.all([
-          getProductById(id),
-          getProducts(),
-        ])
-        setProduct(selectedProduct)
-        setProducts(allProducts)
-        setSelectedImage({
-          productId: getProductId(selectedProduct),
-          image: selectedProduct.image,
-        })
-      } catch {
-        setError('Product could not be loaded. Make sure the backend server is running.')
-      } finally {
-        setLoading(false)
-      }
-    }
+    const timeout = setTimeout(() => {
+      setSelectedImage(galleryImages[0] || '')
+    }, 0)
 
-    loadProduct()
-  }, [id])
+    return () => clearTimeout(timeout)
+  }, [galleryImages])
 
   if (loading) {
-    return <main className="bg-slate-100 px-4 py-10 text-center text-sm text-slate-600">Loading product...</main>
+    return (
+      <main className="bg-slate-100 px-4 py-6">
+        <div className="mx-auto max-w-7xl">
+          <ProductSkeleton />
+        </div>
+      </main>
+    )
   }
 
   if (error || !product) {
-    return <main className="bg-slate-100 px-4 py-10 text-center text-sm text-red-700">{error || 'Product not found.'}</main>
+    return (
+      <main className="bg-slate-100 px-4 py-6">
+        <div className="mx-auto max-w-4xl">
+          <ApiError message={error || 'Product not found.'} onRetry={retry} />
+        </div>
+      </main>
+    )
   }
-
-  const productId = getProductId(product)
-  const productName = getProductName(product)
-  const gallery = products.slice(0, 6)
-  const specs = getProductSpecs(product)
-
-  const tabContent = {
-    Description: product.description,
-    Reviews: `${product.reviews} buyers reviewed this product. Average rating is ${product.rating}.`,
-    Shipping: `${product.shipping}. Supplier supports worldwide shipping from ${product.location}.`,
-    'About seller': `${product.supplier} is based in ${product.location}.`,
-  }
-
-  const mainImage =
-    selectedImage?.productId === productId ? selectedImage.image : product.image
 
   return (
     <main className="bg-slate-100 px-4 py-5">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-4 text-sm text-slate-500">
-          Home &gt; Products &gt; {product.category}
-        </div>
+        <Link className="mb-4 inline-flex rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600" to="/products-grid">
+          Back to products
+        </Link>
 
-        <section className="grid gap-5 rounded-md border border-slate-200 bg-white p-4 lg:grid-cols-[380px_1fr_280px]">
+        <section className="grid gap-5 rounded-md border border-slate-200 bg-white p-4 lg:grid-cols-[520px_1fr_280px]">
           <div>
-            <div className="rounded-md border border-slate-200 p-4">
-              <img className="mx-auto aspect-square w-full object-contain" src={mainImage} alt={productName} />
+            <div className="rounded-md border border-slate-200 p-5">
+              <img className="mx-auto aspect-square w-full object-contain" src={selectedImage || product.image} alt={productName} />
             </div>
-            <div className="mt-3 grid grid-cols-6 gap-2">
-              {gallery.map((item) => (
+
+            <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
+              {galleryImages.map((image) => (
                 <button
-                  className={`rounded-md border object-cover p-1 ${mainImage === item.image ? 'border-blue-500' : 'border-slate-200'}`}
-                  key={getProductId(item)}
+                  className={`rounded-md border bg-white p-1 transition ${image === (selectedImage || product.image) ? 'border-blue-600 ring-2 ring-blue-100' : 'border-slate-200 hover:border-blue-300'}`}
+                  key={image}
                   type="button"
-                  onClick={() => setSelectedImage({ productId, image: item.image })}
+                  onClick={() => setSelectedImage(image)}
                 >
-                  <img className="aspect-square object-cover" src={item.image} alt={getProductName(item)} />
+                  <img className="aspect-square w-full object-cover" src={image} alt={`${productName} thumbnail`} />
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <p className="font-semibold text-green-600">{product.verified ? 'In stock' : 'Limited stock'}</p>
-            <h1 className="mt-2 text-xl font-semibold text-slate-900 md:text-2xl">{productName}</h1>
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-              <span className="font-semibold text-orange-500">{product.rating}</span>
-              <span className="text-slate-500">{product.reviews} reviews</span>
-              <span className="text-slate-500">{product.sold} sold</span>
+            <div className="flex flex-wrap gap-2">
+              <StockBadge stockStatus={product.stockStatus} />
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                {product.category}
+              </span>
+            </div>
+            <h1 className="mt-4 text-2xl font-semibold text-slate-900 md:text-3xl">{productName}</h1>
+            <p className="mt-3 text-sm leading-7 text-slate-600">{product.description}</p>
+
+            <div className="mt-5 rounded-md bg-blue-50 p-5">
+              <p className="text-3xl font-semibold text-blue-700">${product.price.toFixed(2)}</p>
+              <p className="mt-2 text-sm text-slate-600">{product.stock} units available</p>
             </div>
 
-            <div className="mt-5 grid grid-cols-3 overflow-hidden rounded-md bg-orange-50 text-sm">
-              {[50, 100, 700].map((qty, index) => (
-                <div className="border-r border-orange-100 p-4" key={qty}>
-                  <p className="text-lg font-semibold text-red-600">${(product.price - index * 12).toFixed(2)}</p>
-                  <p className="text-slate-500">{qty}-{qty + 49} pcs</p>
-                </div>
-              ))}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <select
+                className="rounded-md border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-slate-100"
+                disabled={product.stock === 0}
+                value={quantity}
+                onChange={(event) => setQuantity(Number(event.target.value))}
+              >
+                {quantityOptions.map((quantity) => (
+                  <option key={quantity} value={quantity}>Qty: {quantity}</option>
+                ))}
+              </select>
+              <button
+                className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                type="button"
+                disabled={product.stock === 0}
+                onClick={() => addToCart(product, quantity)}
+              >
+                Add to cart
+              </button>
             </div>
-
-            <div className="mt-5 divide-y divide-slate-200 text-sm">
-              {Object.entries(specs).map(([key, value]) => (
-                <div className="grid grid-cols-[130px_1fr] py-3" key={key}>
-                  <span className="text-slate-500">{key}</span>
-                  <span className="text-slate-800">{value}</span>
-                </div>
-              ))}
-            </div>
-            <button
-              className="mt-5 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-              type="button"
-              onClick={() => {
-                addToCart(product)
-                setCartMessage(`${productName} added to cart.`)
-              }}
-            >
-              Add to cart
-            </button>
-            {cartMessage && (
-              <p className="mt-3 rounded-md bg-green-50 p-3 text-sm text-green-700">
-                {cartMessage}
-              </p>
-            )}
           </div>
 
           <SupplierCard product={product} />
         </section>
 
-        <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_280px]">
-          <div className="rounded-md border border-slate-200 bg-white">
-            <div className="flex gap-6 border-b border-slate-200 px-5 text-sm font-medium">
-              {Object.keys(tabContent).map((tab) => (
-                <button
-                  className={`py-4 ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
+        {related.length > 0 && (
+          <section className="mt-6">
+            <h2 className="mb-4 text-xl font-semibold text-slate-900">Related products</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {related.map((item) => (
+                <ProductCard key={getProductId(item)} product={item} />
               ))}
             </div>
-            <div className="p-5 text-sm leading-7 text-slate-600">
-              <p>{tabContent[activeTab]}</p>
-              <p className="mt-3">
-                This static product detail view mirrors a marketplace product page with price tiers,
-                supplier information, specifications, tabs, and related product suggestions.
-              </p>
-            </div>
-          </div>
-
-          <aside className="rounded-md border border-slate-200 bg-white p-4">
-            <h3 className="font-semibold text-slate-900">You may like</h3>
-            <div className="mt-4 space-y-3">
-              {products.slice(4, 8).map((item) => (
-                <Link className="flex gap-3" key={getProductId(item)} to={`/product/${getProductId(item)}`}>
-                  <img className="h-14 w-14 rounded-md border border-slate-200 object-cover" src={item.image} alt={getProductName(item)} />
-                  <div>
-                    <p className="line-clamp-2 text-sm text-slate-700">{getProductName(item)}</p>
-                    <p className="text-sm text-slate-500">${item.price}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </aside>
-        </section>
-
-        <section className="mt-5">
-          <h2 className="mb-4 text-xl font-semibold text-slate-900">Related products</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-            {products.slice(0, 5).map((item) => (
-              <ProductCard key={getProductId(item)} product={item} />
-            ))}
-          </div>
-        </section>
+          </section>
+        )}
       </div>
       <DiscountBanner />
     </main>

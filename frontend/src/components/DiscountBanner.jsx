@@ -7,7 +7,7 @@ function DiscountBanner() {
         <div>
           <h2 className="text-xl font-semibold">Super discount on more than 100 USD</h2>
           <p className="mt-1 text-sm text-blue-100">
-            Have you ever finally just write dummy info for marketplace blocks?
+            Explore featured catalog deals and complete checkout from one polished shopping flow.
           </p>
         </div>
         <Link className="w-fit rounded-md bg-orange-400 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-500" to="/products-grid">

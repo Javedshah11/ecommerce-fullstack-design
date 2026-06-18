@@ -1,10 +1,42 @@
 import { Link } from 'react-router-dom'
 
 const columns = [
-  { title: 'About', links: ['About us', 'Find store', 'Categories', 'Blogs'] },
-  { title: 'Partnership', links: ['About us', 'Find store', 'Categories', 'Blogs'] },
-  { title: 'Information', links: ['Help Center', 'Money Refund', 'Shipping', 'Contact us'] },
-  { title: 'For users', links: ['Login', 'Register', 'Settings', 'My Orders'] },
+  {
+    title: 'Marketplace',
+    links: [
+      { label: 'All products', to: '/products-grid' },
+      { label: 'Featured deals', to: '/products-grid?featured=true' },
+      { label: 'List view', to: '/products' },
+      { label: 'Cart', to: '/cart' },
+    ],
+  },
+  {
+    title: 'Account',
+    links: [
+      { label: 'Profile', to: '/profile' },
+      { label: 'Orders', to: '/orders' },
+      { label: 'Checkout', to: '/checkout' },
+      { label: 'Saved items', to: '/cart' },
+    ],
+  },
+  {
+    title: 'Categories',
+    links: [
+      { label: 'Electronics', to: '/products-grid?category=Consumer%20electronics' },
+      { label: 'Computer and tech', to: '/products-grid?category=Computer%20and%20tech' },
+      { label: 'Home interiors', to: '/products-grid?category=Home%20interiors' },
+      { label: 'Tools', to: '/products-grid?category=Tools%2C%20equipments' },
+    ],
+  },
+  {
+    title: 'Support',
+    links: [
+      { label: 'Shipping', to: '/products-grid' },
+      { label: 'Secure checkout', to: '/checkout' },
+      { label: 'Supplier quote', to: '/' },
+      { label: 'Order tracking', to: '/orders' },
+    ],
+  },
 ]
 
 function Footer() {
@@ -18,10 +50,10 @@ function Footer() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8V6a5 5 0 0 1 10 0v2M5 8h14l-1 12H6L5 8Z" />
               </svg>
             </span>
-            Brand
+            MarketPro
           </Link>
           <p className="mt-6 max-w-64 text-base leading-7 text-slate-600">
-            Best information about the company gies here but now lorem ipsum is
+            A complete marketplace experience for discovering products, comparing suppliers, and checking out with confidence.
           </p>
           <div className="mt-5 flex gap-3">
             {['f', 't', 'in', 'ig', 'yt'].map((item) => (
@@ -37,9 +69,9 @@ function Footer() {
             <h3 className="text-base font-semibold text-slate-900">{column.title}</h3>
             <div className="mt-4 space-y-2">
               {column.links.map((link) => (
-                <a className="block text-base text-slate-400 hover:text-blue-600" href="#home" key={link}>
-                  {link}
-                </a>
+                <Link className="block text-base text-slate-400 hover:text-blue-600" to={link.to} key={link.label}>
+                  {link.label}
+                </Link>
               ))}
             </div>
           </div>
