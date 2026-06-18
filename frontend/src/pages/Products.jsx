@@ -1,24 +1,41 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getProducts } from '../api/products'
 import FilterSidebar from '../components/FilterSidebar'
 import MobileFilterDrawer from '../components/MobileFilterDrawer'
 import Pagination from '../components/Pagination'
 import ProductListItem from '../components/ProductListItem'
-import products from '../data/products'
 
 function Products() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [sortBy, setSortBy] = useState('Featured')
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const data = await getProducts()
+        setProducts(data)
+      } catch {
+        setError('Products could not be loaded. Make sure the backend server is running.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProducts()
+  }, [])
 
   const visibleProducts = products
     .filter((product) => (verifiedOnly ? product.verified : true))
     .toSorted((first, second) => {
       if (sortBy === 'Lowest price') return first.price - second.price
-      if (sortBy === 'Newest') return second.id - first.id
+      if (sortBy === 'Newest') return new Date(second.createdAt || 0) - new Date(first.createdAt || 0)
       return second.rating - first.rating
     })
-    .slice(0, 6)
 
   return (
     <main className="bg-slate-100 px-4 py-5">
@@ -38,7 +55,7 @@ function Products() {
           <section>
             <div className="mb-4 flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-4 md:flex-row md:items-center md:justify-between">
               <p className="font-medium text-slate-900">
-                12,911 items in <span className="font-semibold">Mobile accessory</span>
+                {visibleProducts.length} items in <span className="font-semibold">Marketplace catalog</span>
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <button
@@ -74,11 +91,15 @@ function Products() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              {visibleProducts.map((product) => (
-                <ProductListItem key={product.id} product={product} />
-              ))}
-            </div>
+            {loading && <p className="rounded-md bg-white p-5 text-sm text-slate-600">Loading products...</p>}
+            {error && <p className="rounded-md bg-red-50 p-5 text-sm text-red-700">{error}</p>}
+            {!loading && !error && (
+              <div className="space-y-3">
+                {visibleProducts.map((product) => (
+                  <ProductListItem key={product._id} product={product} />
+                ))}
+              </div>
+            )}
 
             <Pagination />
           </section>

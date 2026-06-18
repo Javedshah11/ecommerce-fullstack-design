@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getProducts } from '../api/products'
 import CategorySidebar from '../components/CategorySidebar'
 import Newsletter from '../components/Newsletter'
+import ProductCard from '../components/ProductCard'
 import categories, { regions } from '../data/categories'
 import products from '../data/products'
+import { getProductId } from '../utils/product'
 
 const deals = [
   { label: 'Smart watches', discount: '-25%', image: products[2].image },
@@ -73,6 +76,21 @@ function RecommendedCard({ item }) {
 function Home() {
   const [userMessage, setUserMessage] = useState('')
   const [inquiryMessage, setInquiryMessage] = useState('')
+  const [featuredProducts, setFeaturedProducts] = useState([])
+  const [featuredError, setFeaturedError] = useState('')
+
+  useEffect(() => {
+    async function loadFeaturedProducts() {
+      try {
+        const data = await getProducts({ featured: true })
+        setFeaturedProducts(data)
+      } catch {
+        setFeaturedError('Featured products could not be loaded.')
+      }
+    }
+
+    loadFeaturedProducts()
+  }, [])
 
   function handleInquirySubmit(event) {
     event.preventDefault()
@@ -216,6 +234,20 @@ function Home() {
             )}
           </form>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-295 px-4 pb-10">
+        <h2 className="mb-6 text-3xl font-semibold text-slate-900">Featured products</h2>
+        {featuredError && (
+          <p className="rounded-md bg-red-50 p-4 text-sm text-red-700">{featuredError}</p>
+        )}
+        {!featuredError && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredProducts.map((product) => (
+              <ProductCard key={getProductId(product)} product={product} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="mx-auto max-w-295 px-4 pb-10">

@@ -1,18 +1,22 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { getProductId, getProductName, getProductOldPrice } from '../utils/product'
 
 function ProductListItem({ product }) {
   const [isSaved, setIsSaved] = useState(false)
+  const productId = getProductId(product)
+  const productName = getProductName(product)
+  const oldPrice = getProductOldPrice(product)
 
   return (
     <article className="grid grid-cols-1 gap-4 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-[180px_1fr]">
-      <Link className="flex items-center justify-center rounded-md bg-slate-50 p-4" to={`/product/${product.id}`}>
-        <img className="aspect-square w-full max-w-40 object-contain" src={product.image} alt={product.title} />
+      <Link className="flex items-center justify-center rounded-md bg-slate-50 p-4" to={`/product/${productId}`}>
+        <img className="aspect-square w-full max-w-40 object-contain" src={product.image} alt={productName} />
       </Link>
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-4">
-          <Link className="text-lg font-semibold text-slate-900 hover:text-blue-600" to={`/product/${product.id}`}>
-            {product.title}
+          <Link className="text-lg font-semibold text-slate-900 hover:text-blue-600" to={`/product/${productId}`}>
+            {productName}
           </Link>
           <button
             className={`rounded-md border p-2 text-blue-600 hover:bg-blue-50 ${isSaved ? 'border-blue-200 bg-blue-50' : 'border-slate-200'}`}
@@ -27,7 +31,7 @@ function ProductListItem({ product }) {
         </div>
         <div>
           <span className="text-xl font-semibold text-slate-900">${product.price.toFixed(2)}</span>
-          <span className="ml-2 text-sm text-slate-400 line-through">${product.oldPrice.toFixed(2)}</span>
+          <span className="ml-2 text-sm text-slate-400 line-through">${oldPrice.toFixed(2)}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="font-medium text-orange-500">{product.rating}</span>
@@ -36,7 +40,7 @@ function ProductListItem({ product }) {
           <span className="font-medium text-green-600">{product.shipping}</span>
         </div>
         <p className="max-w-3xl text-sm leading-6 text-slate-600">{product.description}</p>
-        <Link className="text-sm font-semibold text-blue-600" to={`/product/${product.id}`}>
+        <Link className="text-sm font-semibold text-blue-600" to={`/product/${productId}`}>
           View details
         </Link>
       </div>

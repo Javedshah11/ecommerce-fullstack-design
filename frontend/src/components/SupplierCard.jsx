@@ -2,16 +2,17 @@ import { useState } from 'react'
 
 function SupplierCard({ product }) {
   const [message, setMessage] = useState('')
+  const supplier = product.supplier || 'Brand Supply Co.'
 
   return (
     <aside className="rounded-md border border-slate-200 bg-white p-5">
       <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
         <span className="flex h-12 w-12 items-center justify-center rounded-md bg-cyan-100 text-lg font-semibold text-cyan-700">
-          {product.supplier.slice(0, 1)}
+          {supplier.slice(0, 1)}
         </span>
         <div>
           <p className="text-sm text-slate-500">Supplier</p>
-          <h3 className="font-semibold text-slate-900">{product.supplier}</h3>
+          <h3 className="font-semibold text-slate-900">{supplier}</h3>
         </div>
       </div>
 
@@ -31,7 +32,7 @@ function SupplierCard({ product }) {
       <button
         className="mt-2 w-full rounded-md border border-slate-200 bg-white py-2.5 text-sm font-semibold text-blue-600"
         type="button"
-        onClick={() => setMessage(`${product.supplier} profile is selected.`)}
+        onClick={() => setMessage(`${supplier} profile is selected.`)}
       >
         Seller profile
       </button>

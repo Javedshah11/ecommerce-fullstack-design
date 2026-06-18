@@ -1,20 +1,59 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { getProductById, getProducts } from '../api/products'
 import DiscountBanner from '../components/DiscountBanner'
 import ProductCard from '../components/ProductCard'
 import SupplierCard from '../components/SupplierCard'
-import products from '../data/products'
+import { addToCart } from '../utils/cart'
+import { getProductId, getProductName, getProductSpecs } from '../utils/product'
 
 function ProductDetails() {
   const { id } = useParams()
-  const product = products.find((item) => item.id === Number(id)) || products[0]
-  const gallery = products.slice(0, 6)
-  const [selectedImage, setSelectedImage] = useState({
-    productId: product.id,
-    image: product.image,
-  })
+  const [product, setProduct] = useState(null)
+  const [products, setProducts] = useState([])
+  const [selectedImage, setSelectedImage] = useState(null)
   const [activeTab, setActiveTab] = useState('Description')
   const [cartMessage, setCartMessage] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function loadProduct() {
+      try {
+        setLoading(true)
+        setError('')
+        const [selectedProduct, allProducts] = await Promise.all([
+          getProductById(id),
+          getProducts(),
+        ])
+        setProduct(selectedProduct)
+        setProducts(allProducts)
+        setSelectedImage({
+          productId: getProductId(selectedProduct),
+          image: selectedProduct.image,
+        })
+      } catch {
+        setError('Product could not be loaded. Make sure the backend server is running.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProduct()
+  }, [id])
+
+  if (loading) {
+    return <main className="bg-slate-100 px-4 py-10 text-center text-sm text-slate-600">Loading product...</main>
+  }
+
+  if (error || !product) {
+    return <main className="bg-slate-100 px-4 py-10 text-center text-sm text-red-700">{error || 'Product not found.'}</main>
+  }
+
+  const productId = getProductId(product)
+  const productName = getProductName(product)
+  const gallery = products.slice(0, 6)
+  const specs = getProductSpecs(product)
 
   const tabContent = {
     Description: product.description,
@@ -24,7 +63,7 @@ function ProductDetails() {
   }
 
   const mainImage =
-    selectedImage.productId === product.id ? selectedImage.image : product.image
+    selectedImage?.productId === productId ? selectedImage.image : product.image
 
   return (
     <main className="bg-slate-100 px-4 py-5">
@@ -36,17 +75,17 @@ function ProductDetails() {
         <section className="grid gap-5 rounded-md border border-slate-200 bg-white p-4 lg:grid-cols-[380px_1fr_280px]">
           <div>
             <div className="rounded-md border border-slate-200 p-4">
-              <img className="mx-auto aspect-square w-full object-contain" src={mainImage} alt={product.title} />
+              <img className="mx-auto aspect-square w-full object-contain" src={mainImage} alt={productName} />
             </div>
             <div className="mt-3 grid grid-cols-6 gap-2">
               {gallery.map((item) => (
                 <button
                   className={`rounded-md border object-cover p-1 ${mainImage === item.image ? 'border-blue-500' : 'border-slate-200'}`}
-                  key={item.id}
+                  key={getProductId(item)}
                   type="button"
-                  onClick={() => setSelectedImage({ productId: product.id, image: item.image })}
+                  onClick={() => setSelectedImage({ productId, image: item.image })}
                 >
-                  <img className="aspect-square object-cover" src={item.image} alt={item.title} />
+                  <img className="aspect-square object-cover" src={item.image} alt={getProductName(item)} />
                 </button>
               ))}
             </div>
@@ -54,7 +93,7 @@ function ProductDetails() {
 
           <div>
             <p className="font-semibold text-green-600">{product.verified ? 'In stock' : 'Limited stock'}</p>
-            <h1 className="mt-2 text-xl font-semibold text-slate-900 md:text-2xl">{product.title}</h1>
+            <h1 className="mt-2 text-xl font-semibold text-slate-900 md:text-2xl">{productName}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
               <span className="font-semibold text-orange-500">{product.rating}</span>
               <span className="text-slate-500">{product.reviews} reviews</span>
@@ -71,7 +110,7 @@ function ProductDetails() {
             </div>
 
             <div className="mt-5 divide-y divide-slate-200 text-sm">
-              {Object.entries(product.specs).map(([key, value]) => (
+              {Object.entries(specs).map(([key, value]) => (
                 <div className="grid grid-cols-[130px_1fr] py-3" key={key}>
                   <span className="text-slate-500">{key}</span>
                   <span className="text-slate-800">{value}</span>
@@ -81,7 +120,10 @@ function ProductDetails() {
             <button
               className="mt-5 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
               type="button"
-              onClick={() => setCartMessage(`${product.title} added to cart preview.`)}
+              onClick={() => {
+                addToCart(product)
+                setCartMessage(`${productName} added to cart.`)
+              }}
             >
               Add to cart
             </button>
@@ -122,10 +164,10 @@ function ProductDetails() {
             <h3 className="font-semibold text-slate-900">You may like</h3>
             <div className="mt-4 space-y-3">
               {products.slice(4, 8).map((item) => (
-                <Link className="flex gap-3" key={item.id} to={`/product/${item.id}`}>
-                  <img className="h-14 w-14 rounded-md border border-slate-200 object-cover" src={item.image} alt={item.title} />
+                <Link className="flex gap-3" key={getProductId(item)} to={`/product/${getProductId(item)}`}>
+                  <img className="h-14 w-14 rounded-md border border-slate-200 object-cover" src={item.image} alt={getProductName(item)} />
                   <div>
-                    <p className="line-clamp-2 text-sm text-slate-700">{item.title}</p>
+                    <p className="line-clamp-2 text-sm text-slate-700">{getProductName(item)}</p>
                     <p className="text-sm text-slate-500">${item.price}</p>
                   </div>
                 </Link>
@@ -138,7 +180,7 @@ function ProductDetails() {
           <h2 className="mb-4 text-xl font-semibold text-slate-900">Related products</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
             {products.slice(0, 5).map((item) => (
-              <ProductCard key={item.id} product={item} />
+              <ProductCard key={getProductId(item)} product={item} />
             ))}
           </div>
         </section>

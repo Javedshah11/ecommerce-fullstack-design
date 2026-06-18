@@ -1,23 +1,27 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { getProductId, getProductName, getProductOldPrice } from '../utils/product'
 
 function ProductCard({ product }) {
   const [isSaved, setIsSaved] = useState(false)
+  const productId = getProductId(product)
+  const productName = getProductName(product)
+  const oldPrice = getProductOldPrice(product)
 
   return (
     <article className="group rounded-md border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-lg">
-      <Link className="block bg-white p-4" to={`/product/${product.id}`}>
+      <Link className="block bg-white p-4" to={`/product/${productId}`}>
         <img
           className="mx-auto aspect-square w-full max-w-44 object-contain transition group-hover:scale-105"
           src={product.image}
-          alt={product.title}
+          alt={productName}
         />
       </Link>
       <div className="border-t border-slate-100 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-lg font-semibold text-slate-900">${product.price.toFixed(2)}</p>
-            <p className="text-sm text-slate-400 line-through">${product.oldPrice.toFixed(2)}</p>
+            <p className="text-sm text-slate-400 line-through">${oldPrice.toFixed(2)}</p>
           </div>
           <button
             className={`rounded-md border p-2 hover:bg-blue-50 ${isSaved ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-slate-200 text-blue-600'}`}
@@ -30,8 +34,8 @@ function ProductCard({ product }) {
             </svg>
           </button>
         </div>
-        <Link className="mt-2 line-clamp-2 block text-sm leading-6 text-slate-700 hover:text-blue-600" to={`/product/${product.id}`}>
-          {product.title}
+        <Link className="mt-2 line-clamp-2 block text-sm leading-6 text-slate-700 hover:text-blue-600" to={`/product/${productId}`}>
+          {productName}
         </Link>
         <div className="mt-2 flex items-center gap-2 text-sm">
           <span className="font-medium text-orange-500">{product.rating}</span>

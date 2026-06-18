@@ -1,14 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import DiscountBanner from '../components/DiscountBanner'
 import ProductCard from '../components/ProductCard'
-import products, { savedItems } from '../data/products'
+import { getCartItems, saveCartItems } from '../utils/cart'
+import { getProductId, getProductName } from '../utils/product'
 
 function Cart() {
-  const [cartItems, setCartItems] = useState(
-    products.slice(0, 3).map((item) => ({ ...item, quantity: 1 })),
-  )
-  const [savedForLater, setSavedForLater] = useState(savedItems)
+  const [cartItems, setCartItems] = useState(() => getCartItems())
+  const [savedForLater, setSavedForLater] = useState([])
   const [coupon, setCoupon] = useState('')
   const [couponApplied, setCouponApplied] = useState(false)
   const [message, setMessage] = useState('')
@@ -17,24 +16,28 @@ function Cart() {
   const tax = 14
   const total = subtotal - discount + tax
 
+  useEffect(() => {
+    saveCartItems(cartItems)
+  }, [cartItems])
+
   function updateQuantity(id, quantity) {
     setCartItems((current) =>
       current.map((item) =>
-        item.id === id ? { ...item, quantity: Number(quantity) } : item,
+        getProductId(item) === id ? { ...item, quantity: Number(quantity) } : item,
       ),
     )
   }
 
   function removeItem(id) {
-    setCartItems((current) => current.filter((item) => item.id !== id))
+    setCartItems((current) => current.filter((item) => getProductId(item) !== id))
     setMessage('Item removed from cart.')
   }
 
   function saveItem(item) {
     setSavedForLater((current) =>
-      current.some((saved) => saved.id === item.id) ? current : [...current, item],
+      current.some((saved) => getProductId(saved) === getProductId(item)) ? current : [...current, item],
     )
-    removeItem(item.id)
+    removeItem(getProductId(item))
     setMessage('Item saved for later.')
   }
 
@@ -56,17 +59,17 @@ function Cart() {
           <section className="rounded-md border border-slate-200 bg-white p-4">
             <div className="divide-y divide-slate-200">
               {cartItems.map((item) => (
-                <article className="grid gap-4 py-4 first:pt-0 sm:grid-cols-[90px_1fr_auto]" key={item.id}>
-                  <img className="h-20 w-20 rounded-md border border-slate-200 object-cover" src={item.image} alt={item.title} />
+                <article className="grid gap-4 py-4 first:pt-0 sm:grid-cols-[90px_1fr_auto]" key={getProductId(item)}>
+                  <img className="h-20 w-20 rounded-md border border-slate-200 object-cover" src={item.image} alt={getProductName(item)} />
                   <div>
-                    <h2 className="font-semibold text-slate-900">{item.title}</h2>
+                    <h2 className="font-semibold text-slate-900">{getProductName(item)}</h2>
                     <p className="mt-1 text-sm text-slate-500">Size: medium, Color: blue, Material: plastic</p>
                     <p className="text-sm text-slate-500">Seller: {item.supplier}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-semibold text-red-600"
                         type="button"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(getProductId(item))}
                       >
                         Remove
                       </button>
@@ -84,7 +87,7 @@ function Cart() {
                     <select
                       className="mt-3 rounded-md border border-slate-200 px-3 py-2 text-sm"
                       value={item.quantity}
-                      onChange={(event) => updateQuantity(item.id, event.target.value)}
+                      onChange={(event) => updateQuantity(getProductId(item), event.target.value)}
                     >
                       {[1, 2, 3, 4, 5].map((quantity) => (
                         <option key={quantity} value={quantity}>Qty: {quantity}</option>
@@ -154,7 +157,7 @@ function Cart() {
           <h2 className="mb-4 text-xl font-semibold text-slate-900">Saved for later</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {savedForLater.map((item) => (
-              <ProductCard key={item.id} product={item} />
+              <ProductCard key={getProductId(item)} product={item} />
             ))}
           </div>
         </section>
