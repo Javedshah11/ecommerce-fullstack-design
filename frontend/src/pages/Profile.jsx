@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { getOrders } from '../utils/orders'
+import useAuth from '../hooks/useAuth'
 
 function Profile() {
   const orders = getOrders()
+  const { user, logout, isAdmin } = useAuth()
   const [profile, setProfile] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('ecommerce_profile')) || {
-        name: '',
-        email: '',
+        name: user?.name || '',
+        email: user?.email || '',
         phone: '',
         country: '',
       }
     } catch {
-      return { name: '', email: '', phone: '', country: '' }
+      return { name: user?.name || '', email: user?.email || '', phone: '', country: '' }
     }
   })
   const [message, setMessage] = useState('')
@@ -46,7 +48,7 @@ function Profile() {
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-xl font-semibold text-blue-700">{initials}</span>
             <div>
               <h1 className="font-semibold text-slate-900">{profile.name || 'Your account'}</h1>
-              <p className="text-sm text-slate-500">{profile.email || 'Add your contact details'}</p>
+              <p className="text-sm text-slate-500">{profile.email || 'Add your contact details'} ({user?.role})</p>
             </div>
           </div>
           <nav className="mt-6 space-y-1 text-sm">
@@ -59,6 +61,14 @@ function Profile() {
                 {item}
               </button>
             ))}
+            {isAdmin && (
+              <a className="block rounded-md px-3 py-2 font-semibold text-blue-700 hover:bg-blue-50" href="/admin">
+                Admin dashboard
+              </a>
+            )}
+            <button className="block w-full rounded-md px-3 py-2 text-left font-semibold text-red-600 hover:bg-red-50" type="button" onClick={logout}>
+              Logout
+            </button>
           </nav>
         </aside>
 

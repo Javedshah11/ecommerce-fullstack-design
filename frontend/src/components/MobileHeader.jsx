@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
 import useCart from '../hooks/useCart'
 
 function IconButton({ children, label, onClick }) {
@@ -17,6 +18,7 @@ function IconButton({ children, label, onClick }) {
 function MobileHeader({ onMenuClick }) {
   const navigate = useNavigate()
   const { itemCount } = useCart()
+  const { isAuthenticated, user } = useAuth()
 
   function handleSearch(event) {
     event.preventDefault()
@@ -57,10 +59,10 @@ function MobileHeader({ onMenuClick }) {
           </Link>
           <Link
             className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700"
-            to="/profile"
+            to={isAuthenticated ? '/profile' : '/login'}
             aria-label="Profile"
           >
-            U
+            {user?.name?.[0]?.toUpperCase() || 'U'}
           </Link>
         </div>
       </div>

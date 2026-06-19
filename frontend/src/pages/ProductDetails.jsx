@@ -133,10 +133,13 @@ function ProductDetails() {
                 value={quantity}
                 onChange={(event) => setQuantity(Number(event.target.value))}
               >
-                {quantityOptions.map((quantity) => (
-                  <option key={quantity} value={quantity}>Qty: {quantity}</option>
-                ))}
-                
+                {product.stock === 0 ? (
+                  <option value={1}>Out of stock</option>
+                ) : (
+                  quantityOptions.map((quantity) => (
+                    <option key={quantity} value={quantity}>Qty: {quantity}</option>
+                  ))
+                )}
               </select>
               <button
                 className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"

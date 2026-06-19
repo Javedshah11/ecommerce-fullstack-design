@@ -110,7 +110,7 @@ function CartProvider({ children }) {
 
   function updateQuantity(productId, quantity) {
     const product = cartItems.find((item) => getProductId(item) === productId)
-    const nextQuantity = Math.min(Number(quantity), product?.stock || Number(quantity))
+    const nextQuantity = Math.max(1, Math.min(Number(quantity), product?.stock || Number(quantity)))
 
     setStoredItems((current) =>
       current.map((item) =>

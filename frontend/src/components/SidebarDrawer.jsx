@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
 
 const drawerLinks = [
   { label: 'Home', to: '/', icon: 'M3 11.5 12 4l9 7.5M5 10v10h14V10' },
@@ -10,6 +11,13 @@ const drawerLinks = [
 ]
 
 function SidebarDrawer({ isOpen, onClose }) {
+  const { isAuthenticated, isAdmin, logout, user } = useAuth()
+  const links = [
+    ...drawerLinks,
+    ...(isAdmin ? [{ label: 'Admin dashboard', to: '/admin', icon: 'M4 7h16M7 11h10M7 15h10M4 19h16' }] : []),
+    { label: isAuthenticated ? 'Account' : 'Login', to: isAuthenticated ? '/profile' : '/login', icon: 'M15.75 7.5a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0' },
+  ]
+
   return (
     <div className={`fixed inset-0 z-50 lg:hidden ${isOpen ? '' : 'pointer-events-none'}`}>
       <button
@@ -40,11 +48,11 @@ function SidebarDrawer({ isOpen, onClose }) {
               </svg>
             </button>
           </div>
-          <p className="font-medium text-slate-800">MarketPro account</p>
+          <p className="font-medium text-slate-800">{user?.name || 'MarketPro account'}</p>
         </div>
 
         <nav className="py-2">
-          {drawerLinks.map((item, index) => (
+          {links.map((item, index) => (
             <Link
               className={`flex items-center gap-3 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 ${index === 4 || index === 7 ? 'border-t border-slate-200' : ''}`}
               key={item.label}
@@ -57,6 +65,21 @@ function SidebarDrawer({ isOpen, onClose }) {
               {item.label}
             </Link>
           ))}
+          {isAuthenticated && (
+            <button
+              className="flex w-full items-center gap-3 border-t border-slate-200 px-5 py-3 text-left text-sm font-medium text-red-600 hover:bg-slate-50"
+              type="button"
+              onClick={() => {
+                logout()
+                onClose()
+              }}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M15 12H3m12 0-4-4m4 4-4 4M21 4v16" />
+              </svg>
+              Logout
+            </button>
+          )}
         </nav>
       </aside>
     </div>

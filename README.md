@@ -1,19 +1,42 @@
-# Ecommerce Fullstack Design
+# MarketPro MERN Ecommerce
 
-Production-quality Week 2 ecommerce project using React, Tailwind CSS, Node.js, Express, MongoDB, and Mongoose.
+Week 3 final ecommerce submission built with React, Tailwind CSS, Node.js, Express, MongoDB, and Mongoose.
 
-## Screenshots
+## Features
 
-![Home page](docs/screenshots/home.svg)
+- JWT signup and login with token persistence in `localStorage`
+- Role-based access for `user` and `admin`
+- Protected admin dashboard for product CRUD
+- Product catalog with search, categories, sorting, pagination, loading states, and error states
+- Product details page with gallery and add-to-cart
+- Cart stored in `localStorage` with add, remove, increase/decrease quantity, and totals
+- Protected checkout, profile, and orders pages
+- Responsive navbar, product grid, product details, cart, checkout, and admin panel
+- Toast notifications for auth and cart actions
+- Deployment-ready environment variables and CORS config
 
-![Catalog page](docs/screenshots/catalog.svg)
+## Tech Stack
 
-![Cart page](docs/screenshots/cart.svg)
+- Frontend: React, Vite, Tailwind CSS, Axios, React Router
+- Backend: Node.js, Express, MongoDB, Mongoose
+- Auth: JWT signed with `JWT_SECRET`, password hashes with Node `crypto`
 
-## Requirements
+## Environment Variables
 
-- Node.js
-- Local MongoDB running at `mongodb://127.0.0.1:27017/ecommerceDB`
+Backend `backend/.env`:
+
+```bash
+PORT=5000
+MONGO_URI=mongodb://127.0.0.1:27017/ecommerceDB
+JWT_SECRET=replace-with-a-long-random-secret
+CLIENT_URL=http://localhost:5173
+```
+
+Frontend `frontend/.env`:
+
+```bash
+VITE_API_URL=http://localhost:5000/api
+```
 
 ## Backend Setup
 
@@ -25,29 +48,7 @@ npm run seed
 npm run dev
 ```
 
-Backend runs at:
-
-```text
-http://localhost:5000
-```
-
-API endpoints:
-
-```text
-GET    /api/products
-GET    /api/products?page=1&limit=8
-GET    /api/products?sort=price-low
-GET    /api/products?sort=price-high
-GET    /api/products?sort=newest
-GET    /api/products?search=shirt&category=Clothes%20and%20wear
-GET    /api/products/featured
-GET    /api/products/:id
-POST   /api/products
-PUT    /api/products/:id
-DELETE /api/products/:id
-```
-
-Product API responses include computed `stockStatus`: `inStock`, `lowStock`, or `outOfStock`.
+The backend runs at `http://localhost:5000`.
 
 ## Frontend Setup
 
@@ -58,30 +59,44 @@ copy .env.example .env
 npm run dev
 ```
 
-Frontend runs at:
+The frontend runs at `http://localhost:5173`.
+
+## API Endpoints
 
 ```text
-http://localhost:5173
+POST   /api/auth/signup
+POST   /api/auth/login
+GET    /api/auth/me
+
+GET    /api/products
+GET    /api/products/featured
+GET    /api/products/:id
+POST   /api/products          admin only
+PUT    /api/products/:id      admin only
+DELETE /api/products/:id      admin only
 ```
 
-## Data Flow
+## Deployment
 
-- MongoDB products collection is the single source of truth for products.
-- The frontend fetches product data with Axios from `VITE_API_URL`.
-- Cart localStorage stores only `productId` and `quantity`.
-- Cart and checkout fetch the latest product details from the backend before display.
-- Backend validation prevents negative product price or stock values.
-- Product listing supports backend pagination, search, category filters, and sorting.
+Render backend:
 
-## Frontend Features
+- Build command: `npm install`
+- Start command: `npm start`
+- Root directory: `backend`
+- Add `MONGO_URI`, `JWT_SECRET`, `PORT`, and `CLIENT_URL`
 
-- Axios instance in `frontend/src/api/axios.js`
-- Custom hooks: `useProducts`, `useProduct`, `useCart`
-- Product skeleton loading cards
-- Debounced catalog search
-- Category filter buttons
-- Price sorting dropdown
-- Cart item count in the navbar
-- Toast notifications for cart add/remove/clear
-- Empty cart state
-- API error state with retry buttons
+Vercel frontend:
+
+- Framework preset: Vite
+- Root directory: `frontend`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Add `VITE_API_URL` with the deployed Render API URL ending in `/api`
+
+After deployment, set backend `CLIENT_URL` to the Vercel frontend URL so CORS allows the deployed app.
+
+## Links
+
+- GitHub repo: add your repository URL here
+- Live frontend: add your Vercel URL here
+- Live backend: add your Render URL here

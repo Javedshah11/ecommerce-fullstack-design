@@ -41,7 +41,6 @@ function Cart() {
               <div className="divide-y divide-slate-200">
                 {cartItems.map((item) => {
                   const productId = getProductId(item)
-                  const quantityOptions = Array.from({ length: Math.min(item.stock, 10) }).map((_, index) => index + 1)
 
                   return (
                     <article className="grid gap-4 py-4 first:pt-0 sm:grid-cols-[90px_1fr_auto]" key={productId}>
@@ -60,15 +59,29 @@ function Cart() {
                       </div>
                       <div className="sm:text-right">
                         <p className="font-semibold text-slate-900">${(item.price * item.quantity).toFixed(2)}</p>
-                        <select
-                          className="mt-3 rounded-md border border-slate-200 px-3 py-2 text-sm"
-                          value={item.quantity}
-                          onChange={(event) => updateQuantity(productId, event.target.value)}
-                        >
-                          {quantityOptions.map((quantity) => (
-                            <option key={quantity} value={quantity}>Qty: {quantity}</option>
-                          ))}
-                        </select>
+                        <div className="mt-3 inline-flex h-10 items-center overflow-hidden rounded-md border border-slate-200">
+                          <button
+                            className="h-full w-10 text-lg font-semibold text-slate-600 disabled:text-slate-300"
+                            type="button"
+                            aria-label="Decrease quantity"
+                            disabled={item.quantity <= 1}
+                            onClick={() => updateQuantity(productId, item.quantity - 1)}
+                          >
+                            -
+                          </button>
+                          <span className="flex h-full min-w-12 items-center justify-center border-x border-slate-200 px-3 text-sm font-semibold text-slate-900">
+                            {item.quantity}
+                          </span>
+                          <button
+                            className="h-full w-10 text-lg font-semibold text-slate-600 disabled:text-slate-300"
+                            type="button"
+                            aria-label="Increase quantity"
+                            disabled={item.quantity >= item.stock}
+                            onClick={() => updateQuantity(productId, item.quantity + 1)}
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </article>
                   )

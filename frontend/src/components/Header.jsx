@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import categories from '../data/categories'
+import useAuth from '../hooks/useAuth'
 import useCart from '../hooks/useCart'
 
 const iconLinks = [
@@ -12,6 +13,7 @@ const iconLinks = [
 function Header() {
   const navigate = useNavigate()
   const { itemCount } = useCart()
+  const { isAuthenticated, isAdmin, logout, user } = useAuth()
 
   function handleSearch(event) {
     event.preventDefault()
@@ -76,6 +78,14 @@ function Header() {
               {item.label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link className="flex flex-col items-center gap-1 text-sm font-semibold text-blue-600" to="/admin">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7h16M7 11h10M7 15h10M4 19h16" />
+              </svg>
+              Admin
+            </Link>
+          )}
         </div>
       </div>
 
@@ -91,11 +101,18 @@ function Header() {
             <NavLink to="/products-grid?featured=true">Hot offers</NavLink>
             <NavLink to="/products-grid?search=watch">Smart watches</NavLink>
             <NavLink to="/orders">Orders</NavLink>
+            {isAdmin && <NavLink to="/admin">Admin</NavLink>}
             <NavLink to="/profile">Account</NavLink>
             <NavLink to="/cart">Help</NavLink>
           </nav>
           <div className="flex items-center gap-8">
-            <span>English, USD</span>
+            {isAuthenticated ? (
+              <button className="font-semibold text-blue-600" type="button" onClick={logout}>
+                Logout {user?.name ? `(${user.name})` : ''}
+              </button>
+            ) : (
+              <Link className="font-semibold text-blue-600" to="/login">Login</Link>
+            )}
             <span className="flex items-center gap-2">
               Ship to
               <img className="h-4 w-6 object-cover" src="https://flagcdn.com/w40/de.png" alt="Germany" />
