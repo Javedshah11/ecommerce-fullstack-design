@@ -11,7 +11,7 @@ export async function protect(req, res, next) {
 
   try {
     const payload = verifyJwt(token)
-    const user = await User.findById(payload.id).select('-passwordHash -passwordSalt')
+    const user = await User.findById(payload.id).select('-password')
 
     if (!user) {
       return res.status(401).json({ message: 'Not authorized, user not found' })

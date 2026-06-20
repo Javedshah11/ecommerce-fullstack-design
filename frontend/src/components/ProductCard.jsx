@@ -14,6 +14,7 @@ function ProductCard({ product }) {
           className="mx-auto aspect-square w-full max-w-44 object-contain transition group-hover:scale-105"
           src={product.image}
           alt={productName}
+          loading="lazy"
         />
       </Link>
       <div className="border-t border-slate-100 p-4">
@@ -37,6 +38,10 @@ function ProductCard({ product }) {
         <Link className="mt-2 line-clamp-2 block text-sm leading-6 text-slate-700 hover:text-blue-600" to={`/product/${productId}`}>
           {productName}
         </Link>
+        <div className="mt-2 flex items-center gap-2 text-sm text-amber-500">
+          <span aria-hidden="true">*****</span>
+          <span className="font-medium text-slate-500">{Number(product.rating || 0).toFixed(1)}</span>
+        </div>
         <div className="mt-2 flex items-center gap-2 text-sm">
           <span className="font-medium text-blue-600">{product.category}</span>
           {product.featured && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">Featured</span>}

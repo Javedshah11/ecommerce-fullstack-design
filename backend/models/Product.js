@@ -43,8 +43,25 @@ const productSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
+    rating: {
+      type: Number,
+      default: 4.5,
+      min: [0, 'Rating cannot be below 0'],
+      max: [5, 'Rating cannot be above 5'],
+    },
+    reviews: {
+      type: [
+        {
+          name: String,
+          rating: Number,
+          comment: String,
+        },
+      ],
+      default: [],
+    },
   },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
     versionKey: false,

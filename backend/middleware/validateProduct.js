@@ -21,6 +21,10 @@ export function validateProduct(req, res, next) {
     errors.push('stock cannot be negative')
   }
 
+  if (req.body.rating !== undefined && (Number(req.body.rating) < 0 || Number(req.body.rating) > 5)) {
+    errors.push('rating must be between 0 and 5')
+  }
+
   if (req.body.images !== undefined && !Array.isArray(req.body.images)) {
     errors.push('images must be an array')
   }
@@ -41,6 +45,10 @@ export function validateProductUpdate(req, res, next) {
 
   if (req.body.stock !== undefined && Number(req.body.stock) < 0) {
     errors.push('stock cannot be negative')
+  }
+
+  if (req.body.rating !== undefined && (Number(req.body.rating) < 0 || Number(req.body.rating) > 5)) {
+    errors.push('rating must be between 0 and 5')
   }
 
   if (req.body.images !== undefined && !Array.isArray(req.body.images)) {

@@ -1,44 +1,49 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { createOrder } from '../api/orders'
 import useCart from '../hooks/useCart'
-import { addOrder } from '../utils/orders'
 import { getProductId, getProductName } from '../utils/product'
 
 function Checkout() {
   const { cartItems, subtotal, clearCart, loading, error } = useCart()
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [delivery, setDelivery] = useState('standard')
+  const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const shipping = delivery === 'express' ? 24 : cartItems.length ? 8 : 0
   const tax = cartItems.length ? 14 : 0
   const total = subtotal + shipping + tax
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
 
-    addOrder({
-      id: `ORD-${Date.now().toString().slice(-6)}`,
-      date: new Date().toLocaleDateString('en-US', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }),
-      status: 'Processing',
-      customer: formData.get('name'),
-      email: formData.get('email'),
-      delivery,
-      total,
-      items: cartItems.map((item) => ({
-        id: getProductId(item),
-        name: getProductName(item),
-        image: item.image,
-        price: item.price,
-        quantity: item.quantity,
-      })),
-    })
+    setSubmitting(true)
+    setSubmitError('')
 
-    clearCart()
-    setOrderPlaced(true)
+    try {
+      await createOrder({
+        delivery,
+        shippingAddress: {
+          name: formData.get('name'),
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          city: formData.get('city'),
+          address: formData.get('address'),
+        },
+        products: cartItems.map((item) => ({
+          product: getProductId(item),
+          quantity: item.quantity,
+        })),
+      })
+
+      clearCart()
+      setOrderPlaced(true)
+    } catch (apiError) {
+      setSubmitError(apiError.response?.data?.message || 'Order could not be created.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (orderPlaced) {
@@ -71,6 +76,7 @@ function Checkout() {
           <h1 className="text-2xl font-semibold text-slate-900">Checkout</h1>
           {loading && <p className="mt-4 rounded-md bg-slate-50 p-4 text-sm text-slate-600">Loading checkout...</p>}
           {error && <p className="mt-4 rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</p>}
+          {submitError && <p className="mt-4 rounded-md bg-red-50 p-4 text-sm text-red-700">{submitError}</p>}
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <input className="rounded-md border border-slate-200 px-4 py-3 text-sm" name="name" placeholder="Full name" required />
@@ -113,10 +119,10 @@ function Checkout() {
 
           <button
             className="mt-6 rounded-md bg-green-600 px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
-            disabled={cartItems.length === 0 || loading || Boolean(error)}
+            disabled={cartItems.length === 0 || loading || Boolean(error) || submitting}
             type="submit"
           >
-            Place order
+            {submitting ? 'Placing order...' : 'Place order'}
           </button>
         </form>
 

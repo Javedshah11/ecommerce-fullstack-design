@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import bcrypt from 'bcrypt'
 import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema(
@@ -15,11 +15,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    passwordHash: {
-      type: String,
-      required: true,
-    },
-    passwordSalt: {
+    password: {
       type: String,
       required: true,
     },
@@ -27,6 +23,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['user', 'admin'],
       default: 'user',
+    },
+    resetPasswordToken: {
+      type: String,
+      default: '',
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
     },
   },
   {
@@ -36,18 +40,11 @@ const userSchema = new mongoose.Schema(
 )
 
 userSchema.methods.setPassword = function setPassword(password) {
-  this.passwordSalt = crypto.randomBytes(16).toString('hex')
-  this.passwordHash = crypto
-    .pbkdf2Sync(password, this.passwordSalt, 120000, 64, 'sha512')
-    .toString('hex')
+  this.password = bcrypt.hashSync(password, 12)
 }
 
 userSchema.methods.matchPassword = function matchPassword(password) {
-  const candidateHash = crypto
-    .pbkdf2Sync(password, this.passwordSalt, 120000, 64, 'sha512')
-    .toString('hex')
-
-  return crypto.timingSafeEqual(Buffer.from(candidateHash), Buffer.from(this.passwordHash))
+  return bcrypt.compareSync(password, this.password)
 }
 
 userSchema.virtual('id').get(function getId() {

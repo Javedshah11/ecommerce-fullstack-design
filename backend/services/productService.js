@@ -50,7 +50,7 @@ function formatProduct(product) {
 }
 
 function getProductPayload(body) {
-  const allowedFields = ['name', 'price', 'image', 'images', 'description', 'category', 'stock', 'featured']
+  const allowedFields = ['name', 'price', 'image', 'images', 'description', 'category', 'stock', 'featured', 'rating', 'reviews']
 
   return allowedFields.reduce((payload, field) => {
     if (body[field] !== undefined) {

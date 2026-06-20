@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { getOrders } from '../utils/orders'
+import { updateProfile } from '../api/users'
 import useAuth from '../hooks/useAuth'
 
 function Profile() {
-  const orders = getOrders()
   const { user, logout, isAdmin } = useAuth()
   const [profile, setProfile] = useState(() => {
     try {
@@ -18,6 +17,7 @@ function Profile() {
     }
   })
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
   function handleChange(event) {
     setProfile((current) => ({
@@ -26,9 +26,15 @@ function Profile() {
     }))
   }
 
-  function saveProfile() {
-    localStorage.setItem('ecommerce_profile', JSON.stringify(profile))
-    setMessage('Profile saved.')
+  async function saveProfile() {
+    try {
+      setError('')
+      await updateProfile({ name: profile.name, email: profile.email })
+      localStorage.setItem('ecommerce_profile', JSON.stringify(profile))
+      setMessage('Profile saved.')
+    } catch (apiError) {
+      setError(apiError.response?.data?.message || 'Profile could not be saved.')
+    }
   }
 
   const initials = profile.name
@@ -76,13 +82,13 @@ function Profile() {
           <h2 className="text-2xl font-semibold text-slate-900">Account overview</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             {[
-              { label: 'Open orders', value: orders.filter((order) => order.status !== 'Delivered').length },
-              { label: 'Completed orders', value: orders.filter((order) => order.status === 'Delivered').length },
-              { label: 'Total orders', value: orders.length },
+              { label: 'Role', value: user?.role || 'user' },
+              { label: 'Email', value: user?.email || profile.email || 'Not set' },
+              { label: 'Account', value: 'Active' },
             ].map((item) => (
               <div className="rounded-md border border-slate-200 p-4" key={item.label}>
                 <p className="text-sm text-slate-500">{item.label}</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-900">{item.value}</p>
+                <p className="mt-2 break-words text-xl font-semibold text-slate-900">{item.value}</p>
               </div>
             ))}
           </div>
@@ -96,6 +102,7 @@ function Profile() {
               Save changes
             </button>
             {message && <p className="self-center text-sm font-medium text-green-700">{message}</p>}
+            {error && <p className="self-center text-sm font-medium text-red-700">{error}</p>}
           </form>
         </div>
       </section>

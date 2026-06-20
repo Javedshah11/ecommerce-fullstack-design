@@ -29,6 +29,18 @@ function StockBadge({ stockStatus }) {
   )
 }
 
+function ReviewCard({ review }) {
+  return (
+    <article className="rounded-md border border-slate-200 bg-white p-4">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="font-semibold text-slate-900">{review.name}</h3>
+        <span className="text-sm font-semibold text-amber-500">{Number(review.rating || 0).toFixed(1)} / 5</span>
+      </div>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{review.comment}</p>
+    </article>
+  )
+}
+
 function ProductDetails() {
   const { id } = useParams()
   const { product, loading, error, retry } = useProduct(id)
@@ -54,6 +66,12 @@ function ProductDetails() {
 
     return [...new Set(images.filter(Boolean))]
   }, [product])
+  const reviews = product?.reviews?.length
+    ? product.reviews
+    : [
+        { name: 'Ayesha Khan', rating: 5, comment: 'Clean packaging, accurate stock details, and the product matched the photos.' },
+        { name: 'Daniel Stone', rating: 4.5, comment: 'Good value and fast checkout experience. I would order from this catalog again.' },
+      ]
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -92,8 +110,8 @@ function ProductDetails() {
 
         <section className="grid gap-5 rounded-md border border-slate-200 bg-white p-4 lg:grid-cols-[520px_1fr_280px]">
           <div>
-            <div className="rounded-md border border-slate-200 p-5">
-              <img className="mx-auto aspect-square w-full object-contain" src={selectedImage || product.image} alt={productName} />
+            <div className="overflow-hidden rounded-md border border-slate-200 p-5">
+              <img className="mx-auto aspect-square w-full object-contain transition duration-300 hover:scale-110" src={selectedImage || product.image} alt={productName} loading="lazy" />
             </div>
 
             <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
@@ -104,7 +122,7 @@ function ProductDetails() {
                   type="button"
                   onClick={() => setSelectedImage(image)}
                 >
-                  <img className="aspect-square w-full object-cover" src={image} alt={`${productName} thumbnail`} />
+                  <img className="aspect-square w-full object-cover" src={image} alt={`${productName} thumbnail`} loading="lazy" />
                 </button>
               ))}
             </div>
@@ -118,6 +136,11 @@ function ProductDetails() {
               </span>
             </div>
             <h1 className="mt-4 text-2xl font-semibold text-slate-900 md:text-3xl">{productName}</h1>
+            <div className="mt-3 flex items-center gap-3 text-sm">
+              <span className="font-semibold text-amber-500">*****</span>
+              <span className="font-medium text-slate-600">{Number(product.rating || 0).toFixed(1)} rating</span>
+              <span className="text-slate-400">{reviews.length} reviews</span>
+            </div>
             <p className="mt-3 text-sm leading-7 text-slate-600">{product.description}</p>
 
             <div className="mt-5 rounded-md bg-blue-50 p-5">
@@ -165,6 +188,15 @@ function ProductDetails() {
             </div>
           </section>
         )}
+
+        <section className="mt-6">
+          <h2 className="mb-4 text-xl font-semibold text-slate-900">Customer reviews</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {reviews.map((review) => (
+              <ReviewCard key={`${review.name}-${review.comment}`} review={review} />
+            ))}
+          </div>
+        </section>
       </div>
       <DiscountBanner />
     </main>

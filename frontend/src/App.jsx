@@ -8,6 +8,7 @@ import Footer from './components/Footer'
 import AdminDashboard from './pages/AdminDashboard'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import ForgotPassword from './pages/ForgotPassword'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Orders from './pages/Orders'
@@ -15,6 +16,7 @@ import Profile from './pages/Profile'
 import ProductDetails from './pages/ProductDetails'
 import ProductGrid from './pages/ProductGrid'
 import Products from './pages/Products'
+import ResetPassword from './pages/ResetPassword'
 import Signup from './pages/Signup'
 import AuthProvider from './components/AuthProvider'
 import CartProvider from './components/CartProvider'
@@ -59,6 +61,8 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
