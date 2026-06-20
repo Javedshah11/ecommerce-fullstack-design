@@ -1,6 +1,8 @@
 import Order from '../models/Order.js'
 import Product from '../models/Product.js'
 
+const DELIVERY_OPTIONS = ['standard', 'express']
+
 function formatOrder(order) {
   const plain = order.toObject ? order.toObject() : order
 
@@ -13,11 +15,20 @@ function formatOrder(order) {
 export async function createOrder(req, res) {
   const { products = [], shippingAddress = {}, delivery = 'standard' } = req.body
 
+  if (!DELIVERY_OPTIONS.includes(delivery)) {
+    return res.status(400).json({ message: 'Invalid delivery method' })
+  }
+
   if (!Array.isArray(products) || products.length === 0) {
     return res.status(400).json({ message: 'Order products are required' })
   }
 
-  const productIds = products.map((item) => item.product || item.id)
+  const productIds = products.map((item) => item.product || item.id).filter(Boolean)
+
+  if (productIds.length !== products.length) {
+    return res.status(400).json({ message: 'Each order item must include a product id' })
+  }
+
   const dbProducts = await Product.find({ _id: { $in: productIds } })
   const productMap = new Map(dbProducts.map((product) => [product._id.toString(), product]))
 
@@ -26,10 +37,24 @@ export async function createOrder(req, res) {
     const product = productMap.get(productId)
 
     if (!product) {
-      throw new Error(`Product not found: ${productId}`)
+      const error = new Error(`Product not found: ${productId}`)
+      error.statusCode = 404
+      throw error
     }
 
-    const quantity = Math.max(Number(item.quantity) || 1, 1)
+    const quantity = Number(item.quantity)
+
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      const error = new Error(`Invalid quantity for ${product.name}`)
+      error.statusCode = 400
+      throw error
+    }
+
+    if (product.stock < quantity) {
+      const error = new Error(`${product.name} has only ${product.stock} units available`)
+      error.statusCode = 400
+      throw error
+    }
 
     return {
       product: product._id,
@@ -44,13 +69,44 @@ export async function createOrder(req, res) {
   const shipping = delivery === 'express' ? 24 : 8
   const tax = orderProducts.length ? 14 : 0
 
-  const order = await Order.create({
-    user: req.user._id,
-    products: orderProducts,
-    totalPrice: subtotal + shipping + tax,
-    shippingAddress,
-    delivery,
-  })
+  const decrementedItems = []
+  let order
+
+  try {
+    for (const item of orderProducts) {
+      const result = await Product.updateOne(
+        { _id: item.product, stock: { $gte: item.quantity } },
+        { $inc: { stock: -item.quantity } },
+      )
+
+      if (result.modifiedCount !== 1) {
+        const error = new Error(`${item.name} no longer has enough stock`)
+        error.statusCode = 400
+        throw error
+      }
+
+      decrementedItems.push(item)
+    }
+
+    order = await Order.create({
+      user: req.user._id,
+      products: orderProducts,
+      totalPrice: subtotal + shipping + tax,
+      shippingAddress,
+      delivery,
+    })
+  } catch (error) {
+    await Promise.all(
+      decrementedItems.map((item) =>
+        Product.updateOne(
+          { _id: item.product },
+          { $inc: { stock: item.quantity } },
+        ),
+      ),
+    )
+
+    throw error
+  }
 
   res.status(201).json(formatOrder(order))
 }

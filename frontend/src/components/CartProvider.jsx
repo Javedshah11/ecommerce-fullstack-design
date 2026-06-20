@@ -28,15 +28,21 @@ function CartProvider({ children }) {
         const results = await Promise.allSettled(
           storedItems.map(async (item) => {
             const product = await getProductById(item.productId)
+
+            if (product.stock <= 0) {
+              return null
+            }
+
             return {
               ...product,
-              quantity: Math.min(item.quantity, Math.max(product.stock, 1)),
+              quantity: Math.max(1, Math.min(item.quantity, product.stock)),
             }
           }),
         )
         const detailedItems = results
           .filter((result) => result.status === 'fulfilled')
           .map((result) => result.value)
+          .filter(Boolean)
 
         const rejectedResults = results.filter((result) => result.status === 'rejected')
         const networkError = rejectedResults.some((result) => {
@@ -52,7 +58,10 @@ function CartProvider({ children }) {
           .filter((item, index) => {
             const result = results[index]
             const status = result.reason?.response?.status
-            return result.status === 'rejected' && (status === 400 || status === 404)
+            return (
+              (result.status === 'rejected' && (status === 400 || status === 404)) ||
+              (result.status === 'fulfilled' && result.value === null)
+            )
           })
           .map((item) => item.productId)
 
