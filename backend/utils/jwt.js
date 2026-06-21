@@ -13,5 +13,6 @@ export function verifyJwt(token) {
     throw new Error('JWT_SECRET is required')
   }
 
+  
   return jwt.verify(token, process.env.JWT_SECRET)
 }
