@@ -129,6 +129,7 @@ function ProductGrid() {
                   type="button"
                   onClick={() => setIsFilterOpen(true)}
                 >
+                  
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M7 12h10M10 18h4" />
                   </svg>
